@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profiles Profile[]
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomes        Income[]
+  expenses       Expense[]
+  investments    Investment[]
+  debts          Debt[]
+  tasks          Task[]
+  notes          Note[]
+  habits         Habit[]
+  habitLogs      HabitLog[]
+  goals          Goal[]
+  goalMilestones GoalMilestone[]
+}
+
+model Income {
+  id         Int      @id @default(autoincrement())
+  profileId  Int
+  source     String
+  amount     Float
+  currency   String   @default("USD")
+  frequency  String
+  receivedAt DateTime @default(now())
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  category    String
+  description String
+  amount      Float
+  currency    String   @default("USD")
+  spentAt     DateTime @default(now())
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Investment {
+  id           Int      @id @default(autoincrement())
+  profileId    Int
+  name         String
+  type         String
+  currentValue Float
+  costBasis    Float
+  currency     String   @default("USD")
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Debt {
+  id             Int       @id @default(autoincrement())
+  profileId      Int
+  name           String
+  type           String
+  principal      Float
+  interestRate   Float
+  minimumPayment Float?
+  dueDate        DateTime?
+  currency       String    @default("USD")
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  profileId   Int
+  title       String
+  description String?
+  status      String    @default("todo")
+  priority    String    @default("medium")
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  profileId Int
+  title     String
+  content   String
+  tags      String   @default("[]")
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Habit {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  name        String
+  description String?
+  frequency   String   @default("daily")
+  targetDays  String   @default("[]")
+  color       String   @default("#6366f1")
+  icon        String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  logs    HabitLog[]
+}
+
+model HabitLog {
+  id        Int      @id @default(autoincrement())
+  profileId Int
+  habitId   Int
+  date      DateTime
+  completed Boolean  @default(true)
+  note      String?
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  habit   Habit   @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+}
+
+model Goal {
+  id          Int       @id @default(autoincrement())
+  profileId   Int
+  title       String
+  description String?
+  category    String    @default("personal")
+  status      String    @default("active")
+  targetDate  DateTime?
+  progress    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  profile    Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  milestones GoalMilestone[]
+}
+
+model GoalMilestone {
+  id          Int       @id @default(autoincrement())
+  profileId   Int
+  goalId      Int
+  title       String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  goal    Goal    @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
