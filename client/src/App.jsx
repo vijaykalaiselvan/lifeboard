@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import FinancePage from "./pages/finance/FinancePage";
+import TasksPage from "./pages/TasksPage";
 import ComingSoon from "./pages/ComingSoon";
 
 function PrivateRoute({ children }) {
@@ -25,7 +26,7 @@ function AppRoutes() {
             <Layout>
               <Routes>
                 <Route path="/finance"   element={<FinancePage />} />
-                <Route path="/tasks"     element={<ComingSoon title="Tasks"     icon="✅" />} />
+                <Route path="/tasks"     element={<TasksPage />} />
                 <Route path="/notes"     element={<ComingSoon title="Notes"     icon="📝" />} />
                 <Route path="/habits"    element={<ComingSoon title="Habits"    icon="🔥" />} />
                 <Route path="/goals"     element={<ComingSoon title="Goals"     icon="🎯" />} />
