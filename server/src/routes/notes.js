@@ -5,7 +5,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   const notes = await prisma.note.findMany({
-    where: { userId: req.userId },
+    where: { profileId: req.profileId },
     orderBy: [{ pinned: "desc" }, { updatedAt: "desc" }],
   });
   res.json(notes.map((n) => ({ ...n, tags: JSON.parse(n.tags) })));
@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { title, content, tags = [], pinned } = req.body;
   const note = await prisma.note.create({
-    data: { userId: req.userId, title, content, tags: JSON.stringify(tags), pinned },
+    data: { profileId: req.profileId, title, content, tags: JSON.stringify(tags), pinned },
   });
   res.status(201).json({ ...note, tags: JSON.parse(note.tags) });
 });
@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { title, content, tags, pinned } = req.body;
   await prisma.note.updateMany({
-    where: { id: Number(req.params.id), userId: req.userId },
+    where: { id: Number(req.params.id), profileId: req.profileId },
     data: {
       ...(title !== undefined && { title }),
       ...(content !== undefined && { content }),
@@ -34,7 +34,7 @@ router.put("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await prisma.note.deleteMany({ where: { id: Number(req.params.id), userId: req.userId } });
+  await prisma.note.deleteMany({ where: { id: Number(req.params.id), profileId: req.profileId } });
   res.status(204).end();
 });
 

@@ -4,14 +4,14 @@ import prisma from "../lib/prisma.js";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const habits = await prisma.habit.findMany({ where: { userId: req.userId } });
+  const habits = await prisma.habit.findMany({ where: { profileId: req.profileId } });
   res.json(habits.map((h) => ({ ...h, targetDays: JSON.parse(h.targetDays) })));
 });
 
 router.post("/", async (req, res) => {
   const { name, description, frequency, targetDays = [], color, icon } = req.body;
   const habit = await prisma.habit.create({
-    data: { userId: req.userId, name, description, frequency, targetDays: JSON.stringify(targetDays), color, icon },
+    data: { profileId: req.profileId, name, description, frequency, targetDays: JSON.stringify(targetDays), color, icon },
   });
   res.status(201).json({ ...habit, targetDays: JSON.parse(habit.targetDays) });
 });
@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
 router.put("/:id", async (req, res) => {
   const { name, description, frequency, targetDays, color, icon, active } = req.body;
   await prisma.habit.updateMany({
-    where: { id: Number(req.params.id), userId: req.userId },
+    where: { id: Number(req.params.id), profileId: req.profileId },
     data: {
       ...(name !== undefined && { name }),
       ...(description !== undefined && { description }),
@@ -34,19 +34,24 @@ router.put("/:id", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  await prisma.habit.deleteMany({ where: { id: Number(req.params.id), userId: req.userId } });
+  await prisma.habit.deleteMany({ where: { id: Number(req.params.id), profileId: req.profileId } });
   res.status(204).end();
 });
 
-// Habit logs
 router.post("/:id/log", async (req, res) => {
   const { date, completed = true, note } = req.body;
+  // Verify the habit belongs to this profile before logging
+  const habit = await prisma.habit.findFirst({
+    where: { id: Number(req.params.id), profileId: req.profileId },
+  });
+  if (!habit) return res.status(404).json({ error: "Habit not found" });
+
   const d = new Date(date);
   d.setUTCHours(0, 0, 0, 0);
   const log = await prisma.habitLog.upsert({
-    where: { habitId_date: { habitId: Number(req.params.id), date: d } },
+    where: { habitId_date: { habitId: habit.id, date: d } },
     update: { completed, note },
-    create: { userId: req.userId, habitId: Number(req.params.id), date: d, completed, note },
+    create: { profileId: req.profileId, habitId: habit.id, date: d, completed, note },
   });
   res.json(log);
 });
@@ -56,7 +61,7 @@ router.get("/:id/logs", async (req, res) => {
   const logs = await prisma.habitLog.findMany({
     where: {
       habitId: Number(req.params.id),
-      userId: req.userId,
+      profileId: req.profileId,
       ...(from && to && { date: { gte: new Date(from), lte: new Date(to) } }),
     },
     orderBy: { date: "asc" },

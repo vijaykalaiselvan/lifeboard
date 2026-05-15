@@ -3,20 +3,19 @@ import prisma from "../lib/prisma.js";
 
 const router = Router();
 
-// Returns an aggregated summary for the dashboard
 router.get("/", async (req, res) => {
-  const uid = req.userId;
+  const pid = req.profileId;
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
   const [incomes, expenses, investments, debts, tasks, habits, goals] = await Promise.all([
-    prisma.income.findMany({ where: { userId: uid } }),
-    prisma.expense.findMany({ where: { userId: uid } }),
-    prisma.investment.findMany({ where: { userId: uid } }),
-    prisma.debt.findMany({ where: { userId: uid } }),
-    prisma.task.findMany({ where: { userId: uid } }),
-    prisma.habit.findMany({ where: { userId: uid, active: true }, include: { logs: { where: { date: today } } } }),
-    prisma.goal.findMany({ where: { userId: uid, status: "active" } }),
+    prisma.income.findMany({ where: { profileId: pid } }),
+    prisma.expense.findMany({ where: { profileId: pid } }),
+    prisma.investment.findMany({ where: { profileId: pid } }),
+    prisma.debt.findMany({ where: { profileId: pid } }),
+    prisma.task.findMany({ where: { profileId: pid } }),
+    prisma.habit.findMany({ where: { profileId: pid, active: true }, include: { logs: { where: { date: today } } } }),
+    prisma.goal.findMany({ where: { profileId: pid, status: "active" } }),
   ]);
 
   const totalIncome = incomes.reduce((s, i) => s + i.amount, 0);

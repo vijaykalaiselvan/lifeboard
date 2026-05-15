@@ -16,6 +16,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  profiles Profile[]
+}
+
+// ─── Profiles ──────────────────────────────────────────────────────────────
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   incomes        Income[]
   expenses       Expense[]
   investments    Investment[]
@@ -32,7 +45,7 @@ model User {
 
 model Income {
   id         Int      @id @default(autoincrement())
-  userId     Int
+  profileId  Int
   source     String
   amount     Float
   currency   String   @default("USD")
@@ -42,12 +55,12 @@ model Income {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model Expense {
   id          Int      @id @default(autoincrement())
-  userId      Int
+  profileId   Int
   category    String
   description String
   amount      Float
@@ -57,12 +70,12 @@ model Expense {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model Investment {
   id           Int      @id @default(autoincrement())
-  userId       Int
+  profileId    Int
   name         String
   type         String   // stocks, crypto, real-estate, bonds, other
   currentValue Float
@@ -72,12 +85,12 @@ model Investment {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 model Debt {
   id             Int       @id @default(autoincrement())
-  userId         Int
+  profileId      Int
   name           String
   type           String    // credit-card, loan, mortgage, other
   principal      Float
@@ -89,14 +102,14 @@ model Debt {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 // ─── Tasks ─────────────────────────────────────────────────────────────────
 
 model Task {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  profileId   Int
   title       String
   description String?
   status      String    @default("todo")    // todo, in-progress, done
@@ -106,14 +119,14 @@ model Task {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 // ─── Notes ─────────────────────────────────────────────────────────────────
 
 model Note {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  profileId Int
   title     String
   content   String
   tags      String   @default("[]")  // JSON array stored as string
@@ -121,14 +134,14 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 }
 
 // ─── Habits ────────────────────────────────────────────────────────────────
 
 model Habit {
   id          Int      @id @default(autoincrement())
-  userId      Int
+  profileId   Int
   name        String
   description String?
   frequency   String   @default("daily")   // daily, weekly
@@ -139,21 +152,21 @@ model Habit {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  logs HabitLog[]
+  profile Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  logs    HabitLog[]
 }
 
 model HabitLog {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  profileId Int
   habitId   Int
   date      DateTime // stored as start-of-day UTC
   completed Boolean  @default(true)
   note      String?
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  habit   Habit   @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
   @@unique([habitId, date])
 }
@@ -162,7 +175,7 @@ model HabitLog {
 
 model Goal {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  profileId   Int
   title       String
   description String?
   category    String    @default("personal")  // personal, career, health, finance, learning
@@ -172,13 +185,13 @@ model Goal {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profile    Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
   milestones GoalMilestone[]
 }
 
 model GoalMilestone {
   id          Int       @id @default(autoincrement())
-  userId      Int
+  profileId   Int
   goalId      Int
   title       String
   completed   Boolean   @default(false)
@@ -187,6 +200,6 @@ model GoalMilestone {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  goal    Goal    @relation(fields: [goalId], references: [id], onDelete: Cascade)
 }
