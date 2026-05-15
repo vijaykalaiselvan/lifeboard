@@ -19,7 +19,8 @@ export default function LoginPage() {
       login(data);
       navigate("/finance");
     } catch (err) {
-      setError(err.response?.data?.error ?? "Login failed");
+      const msg = err.response?.data?.error ?? err.response?.data?.message ?? err.message ?? "Login failed";
+      setError(typeof msg === "string" ? msg : "Login failed");
     } finally {
       setLoading(false);
     }

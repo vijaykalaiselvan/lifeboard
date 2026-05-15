@@ -19,7 +19,8 @@ export default function RegisterPage() {
       login(data);
       navigate("/finance");
     } catch (err) {
-      setError(err.response?.data?.error ?? "Registration failed");
+      const msg = err.response?.data?.error ?? err.response?.data?.message ?? err.message ?? "Registration failed";
+      setError(typeof msg === "string" ? msg : "Registration failed");
     } finally {
       setLoading(false);
     }
