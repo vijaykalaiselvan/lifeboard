@@ -1,18 +1,25 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { Pool } from "@neondatabase/serverless";
+import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import { neon } from "@neondatabase/serverless";
 
 const g = globalThis;
 
-function createClient() {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  const adapter = new PrismaNeon(pool);
+function createClient(url) {
+  const sql = neon(url);
+  const adapter = new PrismaNeonHttp(sql);
   return new PrismaClient({ adapter });
 }
 
+// Re-read URL on every access so env vars are never captured at module init time.
+// Recreate client if URL changes (e.g. first call was during warm-up without env vars).
 const prisma = new Proxy(Object.create(null), {
   get(_t, prop) {
-    if (!g._prisma) g._prisma = createClient();
+    const url = process.env["DATABASE_URL"];
+    if (!url) throw new Error("DATABASE_URL is not set");
+    if (!g._prisma || g._prismaUrl !== url) {
+      g._prismaUrl = url;
+      g._prisma = createClient(url);
+    }
     const val = g._prisma[prop];
     return typeof val === "function" ? val.bind(g._prisma) : val;
   },
