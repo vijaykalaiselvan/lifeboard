@@ -1,16 +1,15 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeonHttp } from "@prisma/adapter-neon";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const g = globalThis;
 
 function createClient(url) {
-  // PrismaNeonHttp takes the connection string directly and calls neon() internally
-  const adapter = new PrismaNeonHttp(url);
+  const adapter = new PrismaPg({ connectionString: url });
   return new PrismaClient({ adapter });
 }
 
-// Re-read URL on every property access so the env var is read at request time,
-// not at module initialization. Recreate client if the URL changes.
+// Re-read URL on every property access so the env var is always read at
+// request time, not module init. Recreate client if the URL changes.
 const prisma = new Proxy(Object.create(null), {
   get(_t, prop) {
     const url = process.env["DATABASE_URL"];
