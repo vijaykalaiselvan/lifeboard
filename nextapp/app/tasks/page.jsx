@@ -6,15 +6,15 @@ import api from "@/lib/api";
 const EMPTY = { title: "", description: "", status: "todo", priority: "medium", dueDate: "" };
 
 const STATUS_CONFIG = {
-  todo:          { label: "To Do",       color: "bg-gray-500/20 text-gray-300" },
-  "in-progress": { label: "In Progress", color: "bg-yellow-500/20 text-yellow-300" },
-  done:          { label: "Done",        color: "bg-green-500/20 text-green-300" },
+  todo:          { label: "To Do",       color: "bg-slate-100 text-slate-600 dark:bg-gray-500/20 dark:text-gray-300" },
+  "in-progress": { label: "In Progress", color: "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300" },
+  done:          { label: "Done",        color: "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300" },
 };
 
 const PRIORITY_CONFIG = {
-  low:    { label: "Low",    color: "text-gray-400" },
-  medium: { label: "Medium", color: "text-yellow-400" },
-  high:   { label: "High",   color: "text-red-400" },
+  low:    { label: "Low",    color: "text-slate-500 dark:text-gray-400" },
+  medium: { label: "Medium", color: "text-yellow-600 dark:text-yellow-400" },
+  high:   { label: "High",   color: "text-red-600 dark:text-red-400" },
 };
 
 function isOverdue(task) {
@@ -83,77 +83,77 @@ export default function TasksPage() {
     <ProtectedLayout>
       <div className="p-6 max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-white">Tasks</h1>
-          <button onClick={openAdd} className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+          <h1 className="text-2xl font-bold text-text-primary">Tasks</h1>
+          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
             + New Task
           </button>
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-6">
           {[
-            { label: "Total",       value: counts.total,      color: "text-white" },
-            { label: "To Do",       value: counts.todo,       color: "text-gray-300" },
-            { label: "In Progress", value: counts.inProgress, color: "text-yellow-400" },
-            { label: "Done",        value: counts.done,       color: "text-green-400" },
+            { label: "Total",       value: counts.total,      color: "text-text-primary" },
+            { label: "To Do",       value: counts.todo,       color: "text-text-secondary" },
+            { label: "In Progress", value: counts.inProgress, color: "text-yellow-600 dark:text-yellow-400" },
+            { label: "Done",        value: counts.done,       color: "text-green-600 dark:text-green-400" },
           ].map(({ label, value, color }) => (
-            <div key={label} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">{label}</p>
+            <div key={label} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+              <p className="text-xs text-text-muted uppercase tracking-wider">{label}</p>
               <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
             </div>
           ))}
         </div>
 
         {counts.overdue > 0 && (
-          <div className="mb-5 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg">
+          <div className="mb-5 flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm px-4 py-3 rounded-lg">
             <span>⚠️</span>
             <span>{counts.overdue} overdue task{counts.overdue > 1 ? "s" : ""}</span>
           </div>
         )}
 
         {showForm && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-5">
-            <h3 className="text-sm font-medium text-white mb-4">{editing ? "Edit Task" : "New Task"}</h3>
+          <div className="bg-bg-surface border border-border rounded-xl p-5 mb-5 shadow-sm">
+            <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Task" : "New Task"}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs text-gray-400">Title</label>
+                <label className="text-xs text-text-secondary">Title</label>
                 <input required autoFocus value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                   placeholder="What needs to be done?" />
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-gray-400">Description</label>
+                <label className="text-xs text-text-secondary">Description</label>
                 <textarea rows={2} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500 resize-none"
+                  className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent resize-none placeholder:text-text-muted"
                   placeholder="Optional details…" />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs text-gray-400">Status</label>
+                  <label className="text-xs text-text-secondary">Status</label>
                   <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500">
+                    className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent">
                     <option value="todo">To Do</option>
                     <option value="in-progress">In Progress</option>
                     <option value="done">Done</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-gray-400">Priority</label>
+                  <label className="text-xs text-text-secondary">Priority</label>
                   <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500">
+                    className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent">
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs text-gray-400">Due Date</label>
+                  <label className="text-xs text-text-secondary">Due Date</label>
                   <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-indigo-500" />
+                    className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent" />
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
-                <button type="button" onClick={cancelForm} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
-                <button type="submit" className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors">
+                <button type="button" onClick={cancelForm} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                   {editing ? "Save changes" : "Add task"}
                 </button>
               </div>
@@ -163,19 +163,19 @@ export default function TasksPage() {
 
         <div className="flex flex-wrap gap-3 mb-4">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks…"
-            className="flex-1 min-w-48 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-indigo-500" />
-          <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
+            className="flex-1 min-w-48 bg-bg-surface border border-border rounded-lg px-3 py-2 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent" />
+          <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1">
             {["all", "todo", "in-progress", "done"].map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterStatus === s ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-200"}`}>
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterStatus === s ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
                 {s === "all" ? "All" : STATUS_CONFIG[s].label}
               </button>
             ))}
           </div>
-          <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-lg p-1">
+          <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1">
             {["all", "high", "medium", "low"].map((p) => (
               <button key={p} onClick={() => setFilterPriority(p)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterPriority === p ? "bg-indigo-600 text-white" : "text-gray-400 hover:text-gray-200"}`}>
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterPriority === p ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
                 {p === "all" ? "All" : PRIORITY_CONFIG[p].label}
               </button>
             ))}
@@ -183,9 +183,9 @@ export default function TasksPage() {
         </div>
 
         {loading ? (
-          <p className="text-gray-500 text-sm">Loading…</p>
+          <p className="text-text-muted text-sm">Loading…</p>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-gray-600">
+          <div className="text-center py-16 text-text-muted">
             <p className="text-4xl mb-3">✅</p>
             <p>{tasks.length === 0 ? "No tasks yet. Add your first one." : "No tasks match these filters."}</p>
           </div>
@@ -196,29 +196,29 @@ export default function TasksPage() {
               const pc = PRIORITY_CONFIG[task.priority];
               const overdue = isOverdue(task);
               return (
-                <div key={task.id} className={`bg-gray-900 border rounded-xl px-5 py-4 flex items-start gap-4 hover:border-gray-700 transition-colors ${overdue ? "border-red-500/40" : "border-gray-800"} ${task.status === "done" ? "opacity-60" : ""}`}>
+                <div key={task.id} className={`bg-bg-surface border rounded-xl px-5 py-4 flex items-start gap-4 hover:border-border transition-colors shadow-sm ${overdue ? "border-red-500/40" : "border-border"} ${task.status === "done" ? "opacity-60" : ""}`}>
                   <button onClick={() => cycleStatus(task)} title="Click to advance status"
                     className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
-                      task.status === "done" ? "bg-green-500 border-green-500" : task.status === "in-progress" ? "border-yellow-400 bg-yellow-400/20" : "border-gray-600 hover:border-indigo-400"
+                      task.status === "done" ? "bg-green-500 border-green-500" : task.status === "in-progress" ? "border-yellow-400 bg-yellow-400/20" : "border-border hover:border-accent"
                     }`}>
                     {task.status === "done" && <span className="text-white text-xs leading-none">✓</span>}
                   </button>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-medium ${task.status === "done" ? "line-through text-gray-500" : "text-white"}`}>{task.title}</p>
-                    {task.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{task.description}</p>}
+                    <p className={`font-medium ${task.status === "done" ? "line-through text-text-muted" : "text-text-primary"}`}>{task.title}</p>
+                    {task.description && <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{task.description}</p>}
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${sc.color}`}>{sc.label}</span>
                       <span className={`text-xs font-medium ${pc.color}`}>{pc.label} priority</span>
                       {task.dueDate && (
-                        <span className={`text-xs ${overdue ? "text-red-400 font-medium" : "text-gray-500"}`}>
+                        <span className={`text-xs ${overdue ? "text-red-600 dark:text-red-400 font-medium" : "text-text-muted"}`}>
                           {overdue ? "⚠ Overdue · " : "Due "}{new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
-                    <button onClick={() => openEdit(task)} className="text-gray-500 hover:text-indigo-400 text-sm transition-colors">Edit</button>
-                    <button onClick={() => handleDelete(task.id)} className="text-gray-500 hover:text-red-400 text-sm transition-colors">Delete</button>
+                    <button onClick={() => openEdit(task)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
+                    <button onClick={() => handleDelete(task.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
                   </div>
                 </div>
               );
