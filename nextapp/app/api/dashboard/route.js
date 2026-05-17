@@ -21,6 +21,13 @@ export async function GET(request) {
     prisma.goal.findMany({ where: { profileId, status: "active" } }),
   ]);
 
+  const monthlyIncome = incomes.filter((i) => i.frequency === "monthly").reduce((s, i) => s + i.amount, 0);
+  const totalEmi = debts.reduce((s, d) => s + (d.minimumPayment ?? 0), 0);
+  const totalMonthlyExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const netSurplus = monthlyIncome - totalEmi - totalMonthlyExpenses;
+  const emiRatio = monthlyIncome > 0 ? (totalEmi / monthlyIncome) * 100 : 0;
+  const savingsRate = monthlyIncome > 0 ? (netSurplus / monthlyIncome) * 100 : 0;
+
   return NextResponse.json({
     finance: {
       totalIncome: incomes.reduce((s, i) => s + i.amount, 0),
@@ -28,6 +35,14 @@ export async function GET(request) {
       netWorth: investments.reduce((s, i) => s + i.currentValue, 0) - debts.reduce((s, d) => s + d.principal, 0),
       totalInvested: investments.reduce((s, i) => s + i.currentValue, 0),
       totalDebt: debts.reduce((s, d) => s + d.principal, 0),
+    },
+    healthIndicators: {
+      monthlyIncome,
+      totalEmi,
+      totalExpenses: totalMonthlyExpenses,
+      netSurplus,
+      emiRatio: parseFloat(emiRatio.toFixed(1)),
+      savingsRate: parseFloat(savingsRate.toFixed(1)),
     },
     tasks: {
       total: tasks.length,

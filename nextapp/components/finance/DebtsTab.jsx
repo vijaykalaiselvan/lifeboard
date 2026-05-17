@@ -10,6 +10,21 @@ function fmt(n, currency = "USD") {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
 }
 
+function payoffMonths(principal, interestRate, minimumPayment) {
+  if (!minimumPayment || minimumPayment <= 0) return null;
+  const r = interestRate / 100 / 12;
+  if (r === 0) return Math.ceil(principal / minimumPayment);
+  const interest = principal * r;
+  if (minimumPayment <= interest) return null;
+  return Math.ceil(-Math.log(1 - interest / minimumPayment) / Math.log(1 + r));
+}
+
+function closeDate(months) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + Math.ceil(months));
+  return d.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+}
+
 export default function DebtsTab() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -147,10 +162,14 @@ export default function DebtsTab() {
               <span className="text-2xl">{TYPE_ICONS[item.type] ?? "📋"}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary">{item.name}</p>
-                <div className="flex gap-3 mt-0.5">
+                <div className="flex flex-wrap gap-3 mt-0.5">
                   <span className="text-xs text-orange-600 dark:text-orange-400">{item.interestRate}% APR</span>
-                  {item.minimumPayment && <span className="text-xs text-text-muted">Min: {fmt(item.minimumPayment, item.currency)}/mo</span>}
+                  {item.minimumPayment && <span className="text-xs text-text-muted">EMI: {fmt(item.minimumPayment, item.currency)}/mo</span>}
                   {item.dueDate && <span className="text-xs text-text-muted">Due: {new Date(item.dueDate).toLocaleDateString()}</span>}
+                  {(() => {
+                    const mo = payoffMonths(item.principal, item.interestRate, item.minimumPayment);
+                    return mo ? <span className="text-xs text-green-600 dark:text-green-400">Closes {closeDate(mo)} ({mo}mo)</span> : null;
+                  })()}
                 </div>
                 {item.notes && <p className="text-xs text-text-muted mt-0.5">{item.notes}</p>}
               </div>

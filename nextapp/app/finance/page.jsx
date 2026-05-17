@@ -1,15 +1,16 @@
 "use client";
 import { useState } from "react";
 import ProtectedLayout from "@/components/ProtectedLayout";
+import OverviewTab from "@/components/finance/OverviewTab";
 import IncomeTab from "@/components/finance/IncomeTab";
 import ExpensesTab from "@/components/finance/ExpensesTab";
 import InvestmentsTab from "@/components/finance/InvestmentsTab";
 import DebtsTab from "@/components/finance/DebtsTab";
 
-const TABS = ["Income", "Expenses", "Investments", "Debts"];
+const TABS = ["Overview", "Income", "Expenses", "Investments", "Debts"];
 
 export default function FinancePage() {
-  const [tab, setTab] = useState("Income");
+  const [tab, setTab] = useState("Overview");
 
   return (
     <ProtectedLayout>
@@ -25,10 +26,11 @@ export default function FinancePage() {
             </button>
           ))}
         </div>
-        {tab === "Income"      && <IncomeTab />}
-        {tab === "Expenses"    && <ExpensesTab />}
-        {tab === "Investments" && <InvestmentsTab />}
-        {tab === "Debts"       && <DebtsTab />}
+        {tab === "Overview"     && <OverviewTab />}
+        {tab === "Income"       && <IncomeTab />}
+        {tab === "Expenses"     && <ExpensesTab />}
+        {tab === "Investments"  && <InvestmentsTab />}
+        {tab === "Debts"        && <DebtsTab />}
       </div>
     </ProtectedLayout>
   );

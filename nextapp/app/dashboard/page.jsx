@@ -7,6 +7,10 @@ function fmt(n, currency = "USD") {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
 }
 
+function fmtINR(n) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+}
+
 function Card({ children, className = "" }) {
   return (
     <div className={`bg-bg-surface border border-border rounded-xl p-5 shadow-sm ${className}`}>
@@ -45,6 +49,45 @@ export default function DashboardPage() {
           <p className="text-text-muted text-sm">Failed to load dashboard.</p>
         ) : (
           <div className="space-y-6">
+            {data.healthIndicators && (
+              <div>
+                <SectionLabel>Financial Health</SectionLabel>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <p className="text-xs text-text-muted uppercase tracking-wider">Net Monthly Surplus</p>
+                    <p className={`text-2xl font-bold mt-1 ${data.healthIndicators.netSurplus >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {fmtINR(data.healthIndicators.netSurplus)}
+                    </p>
+                    <p className="text-xs text-text-muted mt-1">after EMIs & expenses</p>
+                  </Card>
+                  <Card>
+                    <p className="text-xs text-text-muted uppercase tracking-wider">EMI Ratio</p>
+                    <div className="flex items-end gap-2 mt-1">
+                      <p className={`text-2xl font-bold ${data.healthIndicators.emiRatio >= 55 ? "text-red-500" : data.healthIndicators.emiRatio >= 40 ? "text-yellow-500" : "text-green-500"}`}>
+                        {data.healthIndicators.emiRatio}%
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full mb-1 ${data.healthIndicators.emiRatio >= 55 ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" : data.healthIndicators.emiRatio >= 40 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300" : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300"}`}>
+                        {data.healthIndicators.emiRatio >= 55 ? "Danger" : data.healthIndicators.emiRatio >= 40 ? "Warning" : "Safe"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-muted">target: below 40%</p>
+                  </Card>
+                  <Card>
+                    <p className="text-xs text-text-muted uppercase tracking-wider">Savings Rate</p>
+                    <div className="flex items-end gap-2 mt-1">
+                      <p className={`text-2xl font-bold ${data.healthIndicators.savingsRate < 10 ? "text-red-500" : data.healthIndicators.savingsRate < 20 ? "text-yellow-500" : "text-green-500"}`}>
+                        {data.healthIndicators.savingsRate}%
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full mb-1 ${data.healthIndicators.savingsRate < 10 ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" : data.healthIndicators.savingsRate < 20 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300" : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300"}`}>
+                        {data.healthIndicators.savingsRate < 10 ? "Danger" : data.healthIndicators.savingsRate < 20 ? "Warning" : "Good"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-muted">target: above 20%</p>
+                  </Card>
+                </div>
+              </div>
+            )}
+
             <div>
               <SectionLabel>Finance</SectionLabel>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
