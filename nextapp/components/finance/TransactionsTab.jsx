@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 
-const CATEGORIES = ["Food", "Transport", "Shopping", "Utilities", "Entertainment", "Health", "Education", "Debt", "Income", "Other"];
+const CATEGORIES = ["Food", "Transport", "Shopping", "Utilities", "Entertainment", "Health", "Education", "Housing", "Debt", "Income", "Other"];
 
 const CAT_COLORS = {
   Food:          "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300",
@@ -12,6 +12,7 @@ const CAT_COLORS = {
   Entertainment: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
   Health:        "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300",
   Education:     "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300",
+  Housing:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
   Debt:          "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300",
   Income:        "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
   Other:         "bg-bg-elevated text-text-secondary",
