@@ -6,8 +6,10 @@ import IncomeTab from "@/components/finance/IncomeTab";
 import ExpensesTab from "@/components/finance/ExpensesTab";
 import InvestmentsTab from "@/components/finance/InvestmentsTab";
 import DebtsTab from "@/components/finance/DebtsTab";
+import AccountsTab from "@/components/finance/AccountsTab";
+import TransactionsTab from "@/components/finance/TransactionsTab";
 
-const TABS = ["Overview", "Income", "Expenses", "Investments", "Debts"];
+const TABS = ["Overview", "Income", "Expenses", "Investments", "Debts", "Accounts", "Transactions"];
 
 export default function FinancePage() {
   const [tab, setTab] = useState("Overview");
@@ -26,11 +28,13 @@ export default function FinancePage() {
             </button>
           ))}
         </div>
-        {tab === "Overview"     && <OverviewTab />}
-        {tab === "Income"       && <IncomeTab />}
-        {tab === "Expenses"     && <ExpensesTab />}
-        {tab === "Investments"  && <InvestmentsTab />}
-        {tab === "Debts"        && <DebtsTab />}
+        {tab === "Overview"      && <OverviewTab />}
+        {tab === "Income"        && <IncomeTab />}
+        {tab === "Expenses"      && <ExpensesTab />}
+        {tab === "Investments"   && <InvestmentsTab />}
+        {tab === "Debts"         && <DebtsTab />}
+        {tab === "Accounts"      && <AccountsTab />}
+        {tab === "Transactions"  && <TransactionsTab />}
       </div>
     </ProtectedLayout>
   );

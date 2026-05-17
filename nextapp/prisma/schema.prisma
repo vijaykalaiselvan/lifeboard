@@ -35,6 +35,8 @@ model Profile {
   habitLogs      HabitLog[]
   goals          Goal[]
   goalMilestones GoalMilestone[]
+  bankAccounts   BankAccount[]
+  transactions   Transaction[]
 }
 
 model Income {
@@ -188,4 +190,43 @@ model GoalMilestone {
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   goal    Goal    @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model BankAccount {
+  id             Int      @id @default(autoincrement())
+  profileId      Int
+  name           String
+  bankName       String
+  accountType    String
+  lastFourDigits String?
+  currency       String   @default("INR")
+  color          String?
+  lastImportedAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  profileId   Int
+  accountId   Int
+  date        DateTime
+  description String
+  amount      Float
+  type        String
+  category    String?
+  note        String?
+  reference   String?
+  balance     Float?
+  importHash  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  account BankAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, importHash])
 }
