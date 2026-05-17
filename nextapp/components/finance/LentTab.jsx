@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from "react";
 import api from "@/lib/api";
 
 const EMPTY_LENT = { personName: "", amount: "", lentAt: "", note: "" };
-const EMPTY_REPAYMENT = { amount: "", repaidAt: "", note: "" };
 
 function fmtINR(n) {
   return "₹" + Math.abs(n).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -18,15 +17,22 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const inputCls = "w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted";
+
 export default function LentTab() {
   const [records, setRecords]       = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [filter, setFilter]         = useState("outstanding"); // "all" | "outstanding" | "settled"
+  const [filter, setFilter]         = useState("outstanding");
   const [showForm, setShowForm]     = useState(false);
   const [editing, setEditing]       = useState(null);
   const [form, setForm]             = useState(EMPTY_LENT);
+
+  // Repayment form — separate "which row is open" from "form data"
+  const [repayOpenId, setRepayOpenId] = useState(null);
+  const [repayData, setRepayData]     = useState({ amount: "", repaidAt: todayISO(), note: "" });
+
+  // History expand
   const [expandedId, setExpandedId] = useState(null);
-  const [repayForm, setRepayForm]   = useState(null); // lentId or null
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -36,23 +42,46 @@ export default function LentTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Derived stats
+  // ── Group records by person name ──────────────────────────────────────────
+  const grouped = records.reduce((acc, r) => {
+    const key = r.personName.trim().toLowerCase();
+    if (!acc[key]) acc[key] = { name: r.personName.trim(), records: [] };
+    acc[key].records.push(r);
+    return acc;
+  }, {});
+
+  const groups = Object.values(grouped).map((g) => {
+    const totalLent   = g.records.reduce((s, r) => s + r.amount, 0);
+    const totalRepaid = g.records.reduce((s, r) => s + r.repayments.reduce((rs, rp) => rs + rp.amount, 0), 0);
+    const outstanding = totalLent - totalRepaid;
+    const allSettled  = g.records.every((r) => r.status === "settled");
+    return { ...g, totalLent, totalRepaid, outstanding, allSettled };
+  }).sort((a, b) => b.outstanding - a.outstanding);
+
+  // ── Summary stats ─────────────────────────────────────────────────────────
   const totalLent        = records.reduce((s, r) => s + r.amount, 0);
   const totalRepaid      = records.reduce((s, r) => s + r.repayments.reduce((rs, rp) => rs + rp.amount, 0), 0);
   const totalOutstanding = totalLent - totalRepaid;
-  const settledCount     = records.filter((r) => r.status === "settled").length;
+  const settledCount     = groups.filter((g) => g.allSettled).length;
 
-  const filtered = records.filter((r) => {
-    if (filter === "outstanding") return r.status === "active";
-    if (filter === "settled")     return r.status === "settled";
+  const filteredGroups = groups.filter((g) => {
+    if (filter === "outstanding") return !g.allSettled;
+    if (filter === "settled")     return g.allSettled;
     return true;
   });
 
-  function outstanding(r) {
+  // ── Record helpers ────────────────────────────────────────────────────────
+  function recordOutstanding(r) {
     return r.amount - r.repayments.reduce((s, rp) => s + rp.amount, 0);
   }
 
-  function openAdd() { setForm({ ...EMPTY_LENT, lentAt: todayISO() }); setEditing(null); setShowForm(true); }
+  // ── Form handlers ─────────────────────────────────────────────────────────
+  function openAdd(prefillName = "") {
+    setForm({ ...EMPTY_LENT, personName: prefillName, lentAt: todayISO() });
+    setEditing(null);
+    setShowForm(true);
+  }
+
   function openEdit(r) {
     setForm({ personName: r.personName, amount: String(r.amount), lentAt: r.lentAt?.slice(0, 10) ?? "", note: r.note ?? "" });
     setEditing(r.id);
@@ -69,15 +98,20 @@ export default function LentTab() {
   }
 
   async function handleDelete(id) {
-    if (!confirm("Delete this record and all its repayments?")) return;
+    if (!confirm("Delete this lending record and all its repayments?")) return;
     await api.delete(`/finance/lent/${id}`);
     load();
   }
 
+  function openRepayForm(lentId) {
+    setRepayOpenId(repayOpenId === lentId ? null : lentId);
+    setRepayData({ amount: "", repaidAt: todayISO(), note: "" });
+  }
+
   async function handleAddRepayment(e, lentId) {
     e.preventDefault();
-    await api.post(`/finance/lent/${lentId}/repayments`, repayForm);
-    setRepayForm(null);
+    await api.post(`/finance/lent/${lentId}/repayments`, repayData);
+    setRepayOpenId(null);
     load();
   }
 
@@ -86,8 +120,6 @@ export default function LentTab() {
     load();
   }
 
-  const inputCls = "w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted";
-
   return (
     <div className="space-y-5">
       {/* Summary */}
@@ -95,17 +127,17 @@ export default function LentTab() {
         <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Outstanding</p>
           <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(totalOutstanding)}</p>
-          <p className="text-xs text-text-muted mt-0.5">{records.filter((r) => r.status === "active").length} active</p>
+          <p className="text-xs text-text-muted mt-0.5">{groups.filter((g) => !g.allSettled).length} people</p>
         </div>
         <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Lent</p>
           <p className="text-2xl font-bold text-text-primary mt-1">{fmtINR(totalLent)}</p>
-          <p className="text-xs text-text-muted mt-0.5">{records.length} records</p>
+          <p className="text-xs text-text-muted mt-0.5">{records.length} transactions</p>
         </div>
         <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Fully Recovered</p>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(totalRepaid)}</p>
-          <p className="text-xs text-text-muted mt-0.5">{settledCount} settled</p>
+          <p className="text-xs text-text-muted mt-0.5">{settledCount} people settled</p>
         </div>
       </div>
 
@@ -119,7 +151,7 @@ export default function LentTab() {
             </button>
           ))}
         </div>
-        <button onClick={openAdd}
+        <button onClick={() => openAdd()}
           className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
           + Lend Money
         </button>
@@ -162,154 +194,164 @@ export default function LentTab() {
         </div>
       )}
 
-      {/* Record list */}
+      {/* Groups */}
       {loading ? (
         <p className="text-text-muted text-sm">Loading…</p>
-      ) : filtered.length === 0 ? (
+      ) : filteredGroups.length === 0 ? (
         <div className="text-center py-16 text-text-muted">
           <p className="text-5xl mb-3">🤝</p>
           <p>{filter === "outstanding" ? "No outstanding amounts. Everyone paid you back!" : "No records yet. Click \"Lend Money\" to add one."}</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered
-            .sort((a, b) => outstanding(b) - outstanding(a))
-            .map((r) => {
-              const repaid = r.repayments.reduce((s, rp) => s + rp.amount, 0);
-              const remain = r.amount - repaid;
-              const pct    = Math.min(100, Math.round((repaid / r.amount) * 100));
-              const settled = r.status === "settled";
-              const isExpanded = expandedId === r.id;
-
-              return (
-                <div key={r.id} className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-                  {/* Card header */}
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-text-primary text-lg">{r.personName}</p>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${settled ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"}`}>
-                            {settled ? "Settled" : "Outstanding"}
-                          </span>
-                        </div>
-                        <p className="text-xs text-text-muted mt-0.5">
-                          Lent on {fmtDate(r.lentAt)}
-                          {r.note && <span> · {r.note}</span>}
-                        </p>
-                      </div>
-                      <div className="flex gap-2 flex-shrink-0">
-                        <button onClick={() => openEdit(r)} className="text-xs text-text-muted hover:text-accent transition-colors">Edit</button>
-                        <button onClick={() => handleDelete(r.id)} className="text-xs text-text-muted hover:text-red-500 transition-colors">Delete</button>
-                      </div>
-                    </div>
-
-                    {/* Amounts row */}
-                    <div className="flex items-center gap-6 mt-3">
-                      <div>
-                        <p className="text-xs text-text-muted">Lent</p>
-                        <p className="text-base font-semibold text-text-primary">{fmtINR(r.amount)}</p>
-                      </div>
-                      <div className="text-text-muted text-sm">→</div>
-                      <div>
-                        <p className="text-xs text-text-muted">Repaid</p>
-                        <p className="text-base font-semibold text-green-600 dark:text-green-400">{fmtINR(repaid)}</p>
-                      </div>
-                      <div className="text-text-muted text-sm">→</div>
-                      <div>
-                        <p className="text-xs text-text-muted">Remaining</p>
-                        <p className={`text-base font-bold ${settled ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                          {settled ? "Cleared" : fmtINR(remain)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="mt-3 h-1.5 bg-bg-elevated rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${settled ? "bg-green-500" : "bg-accent"}`}
-                        style={{ width: `${pct}%` }} />
-                    </div>
-                    <p className="text-xs text-text-muted mt-1">{pct}% repaid</p>
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2 mt-3">
-                      {!settled && (
-                        <button onClick={() => setRepayForm(repayForm === r.id ? null : r.id)}
-                          className="text-xs bg-accent/10 hover:bg-accent/20 text-accent border border-accent/30 px-3 py-1.5 rounded-lg transition-colors">
-                          + Add Repayment
-                        </button>
-                      )}
-                      <button onClick={() => setExpandedId(isExpanded ? null : r.id)}
-                        className="text-xs bg-bg-elevated hover:bg-border text-text-secondary border border-border px-3 py-1.5 rounded-lg transition-colors">
-                        {isExpanded ? "Hide history" : `History (${r.repayments.length})`}
-                      </button>
-                    </div>
-
-                    {/* Inline repayment form */}
-                    {repayForm === r.id && (
-                      <form onSubmit={(e) => handleAddRepayment(e, r.id)}
-                        className="mt-3 grid grid-cols-3 gap-3 p-3 bg-bg-elevated rounded-lg border border-border">
-                        <div className="space-y-1">
-                          <label className="text-xs text-text-secondary">Amount (₹)</label>
-                          <input required type="number" min="1" step="0.01"
-                            value={repayForm?.amount ?? ""}
-                            onChange={(e) => setRepayForm((prev) => ({ ...EMPTY_REPAYMENT, ...prev, amount: e.target.value }))}
-                            className={inputCls} placeholder="0" />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-text-secondary">Date</label>
-                          <input type="date"
-                            value={repayForm?.repaidAt ?? todayISO()}
-                            onChange={(e) => setRepayForm((prev) => ({ ...EMPTY_REPAYMENT, ...prev, repaidAt: e.target.value }))}
-                            className={inputCls} />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs text-text-secondary">Note</label>
-                          <input value={repayForm?.note ?? ""}
-                            onChange={(e) => setRepayForm((prev) => ({ ...EMPTY_REPAYMENT, ...prev, note: e.target.value }))}
-                            className={inputCls} placeholder="Optional" />
-                        </div>
-                        <div className="col-span-3 flex gap-2 justify-end">
-                          <button type="button" onClick={() => setRepayForm(null)}
-                            className="text-xs text-text-secondary hover:text-text-primary px-3 py-1.5">Cancel</button>
-                          <button type="submit"
-                            className="text-xs bg-accent hover:bg-accent/90 text-white px-4 py-1.5 rounded-lg transition-colors">
-                            Record Repayment
-                          </button>
-                        </div>
-                      </form>
-                    )}
+        <div className="space-y-4">
+          {filteredGroups.map((g) => (
+            <div key={g.name} className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
+              {/* Person header */}
+              <div className="px-5 py-4 border-b border-border bg-bg-elevated/40 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-accent font-bold text-sm flex-shrink-0">
+                    {g.name.charAt(0).toUpperCase()}
                   </div>
+                  <div>
+                    <p className="font-semibold text-text-primary">{g.name}</p>
+                    <p className="text-xs text-text-muted">{g.records.length} transaction{g.records.length > 1 ? "s" : ""} · Total lent {fmtINR(g.totalLent)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-xs text-text-muted">Remaining</p>
+                    <p className={`text-lg font-bold ${g.allSettled ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {g.allSettled ? "Settled ✓" : fmtINR(g.outstanding)}
+                    </p>
+                  </div>
+                  <button onClick={() => openAdd(g.name)}
+                    className="text-xs bg-bg-elevated hover:bg-accent hover:text-white border border-border px-3 py-1.5 rounded-lg transition-colors">
+                    + Lend More
+                  </button>
+                </div>
+              </div>
 
-                  {/* Repayment history */}
-                  {isExpanded && (
-                    <div className="border-t border-border bg-bg-elevated/40 px-5 py-3">
-                      {r.repayments.length === 0 ? (
-                        <p className="text-xs text-text-muted">No repayments recorded yet.</p>
-                      ) : (
-                        <div className="space-y-2">
-                          <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Repayment History</p>
-                          {r.repayments.map((rp) => (
+              {/* Individual lending records */}
+              <div className="divide-y divide-border">
+                {g.records.map((r) => {
+                  const repaid  = r.repayments.reduce((s, rp) => s + rp.amount, 0);
+                  const remain  = recordOutstanding(r);
+                  const pct     = Math.min(100, Math.round((repaid / r.amount) * 100));
+                  const settled = r.status === "settled";
+                  const isExpanded = expandedId === r.id;
+
+                  return (
+                    <div key={r.id} className="px-5 py-4">
+                      {/* Record row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium text-text-primary">{fmtINR(r.amount)}</span>
+                            <span className="text-xs text-text-muted">lent {fmtDate(r.lentAt)}</span>
+                            {r.note && <span className="text-xs text-text-muted">· {r.note}</span>}
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${settled ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300" : "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300"}`}>
+                              {settled ? "Settled" : `${fmtINR(remain)} left`}
+                            </span>
+                          </div>
+
+                          {/* Progress bar */}
+                          <div className="mt-2 h-1 bg-bg-elevated rounded-full overflow-hidden w-48">
+                            <div className={`h-full rounded-full ${settled ? "bg-green-500" : "bg-accent"}`}
+                              style={{ width: `${pct}%` }} />
+                          </div>
+                          <p className="text-[10px] text-text-muted mt-0.5">{fmtINR(repaid)} repaid ({pct}%)</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {!settled && (
+                            <button onClick={() => openRepayForm(r.id)}
+                              className={`text-xs px-3 py-1 rounded-lg border transition-colors ${repayOpenId === r.id ? "bg-accent text-white border-accent" : "bg-bg-elevated hover:bg-accent/10 border-border text-accent"}`}>
+                              + Repayment
+                            </button>
+                          )}
+                          <button onClick={() => setExpandedId(isExpanded ? null : r.id)}
+                            className="text-xs text-text-muted hover:text-text-primary transition-colors">
+                            {isExpanded ? "▲" : `▼ ${r.repayments.length}`}
+                          </button>
+                          <button onClick={() => openEdit(r)} className="text-xs text-text-muted hover:text-accent transition-colors">Edit</button>
+                          <button onClick={() => handleDelete(r.id)} className="text-xs text-text-muted hover:text-red-500 transition-colors">✕</button>
+                        </div>
+                      </div>
+
+                      {/* Repayment form — separate state so typing doesn't close it */}
+                      {repayOpenId === r.id && (
+                        <form onSubmit={(e) => handleAddRepayment(e, r.id)}
+                          className="mt-3 grid grid-cols-3 gap-3 p-3 bg-bg-elevated rounded-lg border border-border">
+                          <div className="space-y-1">
+                            <label className="text-xs text-text-secondary">Amount (₹)</label>
+                            <input
+                              required
+                              type="number"
+                              min="1"
+                              step="0.01"
+                              value={repayData.amount}
+                              onChange={(e) => setRepayData((d) => ({ ...d, amount: e.target.value }))}
+                              className={inputCls}
+                              placeholder="0"
+                              autoFocus
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-text-secondary">Date</label>
+                            <input
+                              type="date"
+                              value={repayData.repaidAt}
+                              onChange={(e) => setRepayData((d) => ({ ...d, repaidAt: e.target.value }))}
+                              className={inputCls}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs text-text-secondary">Note</label>
+                            <input
+                              value={repayData.note}
+                              onChange={(e) => setRepayData((d) => ({ ...d, note: e.target.value }))}
+                              className={inputCls}
+                              placeholder="Optional"
+                            />
+                          </div>
+                          <div className="col-span-3 flex gap-2 justify-end">
+                            <button type="button" onClick={() => setRepayOpenId(null)}
+                              className="text-xs text-text-secondary hover:text-text-primary px-3 py-1.5">Cancel</button>
+                            <button type="submit"
+                              className="text-xs bg-accent hover:bg-accent/90 text-white px-4 py-1.5 rounded-lg transition-colors">
+                              Record Repayment
+                            </button>
+                          </div>
+                        </form>
+                      )}
+
+                      {/* Repayment history */}
+                      {isExpanded && (
+                        <div className="mt-3 pl-2 border-l-2 border-border space-y-1.5">
+                          {r.repayments.length === 0 ? (
+                            <p className="text-xs text-text-muted">No repayments yet.</p>
+                          ) : r.repayments.map((rp) => (
                             <div key={rp.id} className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
                                 <span className="text-xs text-text-muted">{fmtDate(rp.repaidAt)}</span>
                                 {rp.note && <span className="text-xs text-text-muted">· {rp.note}</span>}
                               </div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm font-medium text-green-600 dark:text-green-400">+{fmtINR(rp.amount)}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-green-600 dark:text-green-400">+{fmtINR(rp.amount)}</span>
                                 <button onClick={() => handleDeleteRepayment(r.id, rp.id)}
-                                  className="text-text-muted hover:text-red-500 text-xs transition-colors">✕</button>
+                                  className="text-text-muted hover:text-red-500 text-[10px] transition-colors">✕</button>
                               </div>
                             </div>
                           ))}
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
