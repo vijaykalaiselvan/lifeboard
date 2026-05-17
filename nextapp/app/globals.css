@@ -1,6 +1,54 @@
 @import "tailwindcss";
 
+/* Tailwind v4: class-based dark mode (next-themes adds .dark to <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light mode tokens */
+:root {
+  --color-bg-base:        #f8fafc;
+  --color-bg-surface:     #ffffff;
+  --color-bg-elevated:    #f1f5f9;
+  --color-border:         #e2e8f0;
+  --color-text-primary:   #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #94a3b8;
+  --color-accent:         #4f46e5;
+  --color-accent-bg:      #eef2ff;
+}
+
+/* Dark mode tokens */
+.dark {
+  --color-bg-base:        #0a0a0f;
+  --color-bg-surface:     #111118;
+  --color-bg-elevated:    #1c1c27;
+  --color-border:         #2a2a3a;
+  --color-text-primary:   #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted:     #4b5563;
+  --color-accent:         #6366f1;
+  --color-accent-bg:      #1e1b4b;
+}
+
+/* Register as Tailwind utilities so bg-bg-surface, text-text-primary, etc. work */
+@theme inline {
+  --color-bg-base:         var(--color-bg-base);
+  --color-bg-surface:      var(--color-bg-surface);
+  --color-bg-elevated:     var(--color-bg-elevated);
+  --color-border:          var(--color-border);
+  --color-text-primary:    var(--color-text-primary);
+  --color-text-secondary:  var(--color-text-secondary);
+  --color-text-muted:      var(--color-text-muted);
+  --color-accent:          var(--color-accent);
+  --color-accent-bg:       var(--color-accent-bg);
+}
+
+html {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 body {
-  background: #030712;
-  color: #f3f4f6;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

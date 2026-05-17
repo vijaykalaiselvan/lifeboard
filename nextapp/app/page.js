@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(token ? "/finance" : "/login");
+    router.replace(token ? "/dashboard" : "/login");
   }, [token, router]);
 
   return null;

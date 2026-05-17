@@ -25,7 +25,7 @@ export default function LoginPage() {
       const data = text ? JSON.parse(text) : {};
       if (!res.ok) throw new Error(data.error ?? `Server error ${res.status}`);
       login(data);
-      router.push("/finance");
+      router.push("/dashboard");
     } catch (err) {
       setError(err.message ?? "Login failed");
     } finally {
@@ -34,35 +34,63 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-bg-base flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white">Life Dashboard</h1>
-          <p className="text-gray-400 mt-2">Sign in to your account</p>
+          <div className="inline-flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none">
+                <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                <rect x="13" y="3" width="8" height="8" rx="1.5"/>
+                <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+                <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+              </svg>
+            </div>
+            <span className="text-xl font-semibold text-text-primary tracking-tight">Lifeboard</span>
+          </div>
+          <p className="text-text-secondary text-sm">Sign in to your account</p>
         </div>
-        <form onSubmit={handleSubmit} className="bg-gray-900 rounded-2xl p-8 space-y-5 border border-gray-800">
+
+        <form onSubmit={handleSubmit} className="bg-bg-surface rounded-2xl p-8 space-y-5 border border-border shadow-sm">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-lg">{error}</div>
+            <div className="bg-red-500/10 border border-red-500/30 text-red-500 text-sm px-4 py-3 rounded-lg">
+              {error}
+            </div>
           )}
-          <div className="space-y-1">
-            <label className="text-sm text-gray-400">Email</label>
-            <input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              placeholder="you@example.com" />
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-secondary">Email</label>
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+              placeholder="you@example.com"
+            />
           </div>
-          <div className="space-y-1">
-            <label className="text-sm text-gray-400">Password</label>
-            <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-              placeholder="••••••••" />
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-text-secondary">Password</label>
+            <input
+              type="password"
+              required
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="w-full bg-bg-elevated border border-border rounded-lg px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+              placeholder="••••••••"
+            />
           </div>
-          <button type="submit" disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-accent hover:bg-accent/90 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors"
+          >
             {loading ? "Signing in…" : "Sign in"}
           </button>
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-text-muted">
             No account?{" "}
-            <Link href="/register" className="text-indigo-400 hover:text-indigo-300">Register</Link>
+            <Link href="/register" className="text-accent hover:text-accent/80 transition-colors">
+              Register
+            </Link>
           </p>
         </form>
       </div>
