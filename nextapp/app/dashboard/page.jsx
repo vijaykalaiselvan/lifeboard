@@ -90,7 +90,7 @@ export default function DashboardPage() {
 
             <div>
               <SectionLabel>Finance</SectionLabel>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Net Worth</p>
                   <p className={`text-2xl font-bold mt-1 ${data.finance.netWorth >= 0 ? "text-green-500" : "text-red-500"}`}>
@@ -109,10 +109,17 @@ export default function DashboardPage() {
                   <p className="text-xs text-text-muted uppercase tracking-wider">Investments</p>
                   <p className="text-2xl font-bold text-accent mt-1">{fmtINR(data.finance.totalInvested)}</p>
                 </Card>
+                <Card>
+                  <p className="text-xs text-text-muted uppercase tracking-wider">Lent Outstanding</p>
+                  <p className={`text-2xl font-bold mt-1 ${data.lent.totalOutstanding > 0 ? "text-yellow-500" : "text-green-500"}`}>
+                    {fmtINR(data.lent.totalOutstanding)}
+                  </p>
+                  <p className="text-xs text-text-muted mt-1">{data.lent.peopleCount} {data.lent.peopleCount === 1 ? "person" : "people"} owe you</p>
+                </Card>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <SectionLabel>Tasks</SectionLabel>
                 <div className="space-y-2">
@@ -151,6 +158,27 @@ export default function DashboardPage() {
                   <span className="text-text-muted text-lg">%</span>
                 </p>
                 <p className="text-xs text-text-muted mt-1">avg. progress across {data.goals.total} active goals</p>
+              </Card>
+
+              <Card>
+                <SectionLabel>Lent Money</SectionLabel>
+                {data.lent.topOwing.length === 0 ? (
+                  <p className="text-sm text-text-muted">All settled up!</p>
+                ) : (
+                  <div className="space-y-2">
+                    {data.lent.topOwing.map((p) => (
+                      <div key={p.name} className="flex justify-between items-center">
+                        <span className="text-text-secondary text-sm truncate max-w-[120px]">{p.name}</span>
+                        <span className="text-yellow-500 font-medium text-sm">{fmtINR(p.outstanding)}</span>
+                      </div>
+                    ))}
+                    {data.lent.settledCount > 0 && (
+                      <p className="text-xs text-text-muted pt-1 border-t border-border">
+                        {data.lent.settledCount} settled
+                      </p>
+                    )}
+                  </div>
+                )}
               </Card>
             </div>
           </div>
