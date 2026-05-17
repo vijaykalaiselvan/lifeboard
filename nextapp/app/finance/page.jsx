@@ -6,10 +6,11 @@ import IncomeTab from "@/components/finance/IncomeTab";
 import ExpensesTab from "@/components/finance/ExpensesTab";
 import InvestmentsTab from "@/components/finance/InvestmentsTab";
 import DebtsTab from "@/components/finance/DebtsTab";
+import LentTab from "@/components/finance/LentTab";
 import AccountsTab from "@/components/finance/AccountsTab";
 import TransactionsTab from "@/components/finance/TransactionsTab";
 
-const TABS = ["Overview", "Income", "Expenses", "Investments", "Debts", "Accounts", "Transactions"];
+const TABS = ["Overview", "Income", "Expenses", "Investments", "Debts", "Lent", "Accounts", "Transactions"];
 
 export default function FinancePage() {
   const [tab, setTab] = useState("Overview");
@@ -33,6 +34,7 @@ export default function FinancePage() {
         {tab === "Expenses"      && <ExpensesTab />}
         {tab === "Investments"   && <InvestmentsTab />}
         {tab === "Debts"         && <DebtsTab />}
+        {tab === "Lent"          && <LentTab />}
         {tab === "Accounts"      && <AccountsTab />}
         {tab === "Transactions"  && <TransactionsTab />}
       </div>

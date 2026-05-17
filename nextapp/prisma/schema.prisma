@@ -37,6 +37,7 @@ model Profile {
   goalMilestones GoalMilestone[]
   bankAccounts   BankAccount[]
   transactions   Transaction[]
+  lentRecords    LentRecord[]
 }
 
 model Income {
@@ -229,4 +230,32 @@ model Transaction {
   account BankAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@unique([accountId, importHash])
+}
+
+model LentRecord {
+  id         Int             @id @default(autoincrement())
+  profileId  Int
+  personName String
+  amount     Float
+  currency   String          @default("INR")
+  lentAt     DateTime        @default(now())
+  note       String?
+  status     String          @default("active")
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  profile    Profile         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  repayments LentRepayment[]
+}
+
+model LentRepayment {
+  id        Int        @id @default(autoincrement())
+  lentId    Int
+  amount    Float
+  repaidAt  DateTime   @default(now())
+  note      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  lent LentRecord @relation(fields: [lentId], references: [id], onDelete: Cascade)
 }
