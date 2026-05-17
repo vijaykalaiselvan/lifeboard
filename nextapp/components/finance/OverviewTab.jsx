@@ -34,25 +34,55 @@ function Badge({ color, children }) {
   return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${styles[color]}`}>{children}</span>;
 }
 
+function currentMonthRange() {
+  const d = new Date();
+  const y = d.getFullYear(), m = d.getMonth() + 1;
+  const from = `${y}-${String(m).padStart(2, "0")}-01`;
+  const to   = `${y}-${String(m).padStart(2, "0")}-${String(new Date(y, m, 0).getDate()).padStart(2, "0")}`;
+  return { from, to };
+}
+
 export default function OverviewTab() {
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [debts, setDebts] = useState([]);
+  const [bankCredits, setBankCredits] = useState([]);
+  const [bankDebits, setBankDebits] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get("/finance/income"), api.get("/finance/expenses"), api.get("/finance/debts")])
-      .then(([i, e, d]) => { setIncomes(i.data); setExpenses(e.data); setDebts(d.data); })
+    const { from, to } = currentMonthRange();
+    Promise.all([
+      api.get("/finance/income"),
+      api.get("/finance/expenses"),
+      api.get("/finance/debts"),
+      api.get(`/finance/transactions?type=credit&from=${from}&to=${to}&limit=500`),
+      api.get(`/finance/transactions?type=debit&from=${from}&to=${to}&limit=500`),
+    ])
+      .then(([i, e, d, tc, td]) => {
+        setIncomes(i.data);
+        setExpenses(e.data);
+        setDebts(d.data);
+        setBankCredits(tc.data.transactions ?? []);
+        setBankDebits(td.data.transactions ?? []);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-text-muted text-sm">Loading…</p>;
 
-  const monthlyIncome = incomes.filter((i) => i.frequency === "monthly").reduce((s, i) => s + i.amount, 0);
-  const totalEmi = debts.reduce((s, d) => s + (d.minimumPayment ?? 0), 0);
-  const monthlyExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-  const netSurplus = monthlyIncome - totalEmi - monthlyExpenses;
-  const emiRatio = monthlyIncome > 0 ? (totalEmi / monthlyIncome) * 100 : 0;
+  const manualIncome   = incomes.filter((i) => i.frequency === "monthly").reduce((s, i) => s + i.amount, 0);
+  const bankCreditAmt  = bankCredits.reduce((s, t) => s + t.amount, 0);
+  const monthlyIncome  = manualIncome + bankCreditAmt;
+
+  const totalEmi       = debts.reduce((s, d) => s + (d.minimumPayment ?? 0), 0);
+
+  const manualExpenses  = expenses.reduce((s, e) => s + e.amount, 0);
+  const bankDebitAmt    = bankDebits.filter((t) => t.category !== "Debt").reduce((s, t) => s + t.amount, 0);
+  const monthlyExpenses = manualExpenses + bankDebitAmt;
+
+  const netSurplus  = monthlyIncome - totalEmi - monthlyExpenses;
+  const emiRatio    = monthlyIncome > 0 ? (totalEmi / monthlyIncome) * 100 : 0;
   const savingsRate = monthlyIncome > 0 ? (netSurplus / monthlyIncome) * 100 : 0;
   const sortedDebts = [...debts].sort((a, b) => b.interestRate - a.interestRate);
   const now = new Date();
@@ -64,14 +94,15 @@ export default function OverviewTab() {
         <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Monthly Cash Flow</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Income",      value: monthlyIncome,    color: "text-green-600 dark:text-green-400" },
-            { label: "EMIs",        value: totalEmi,         color: "text-red-600 dark:text-red-400" },
-            { label: "Expenses",    value: monthlyExpenses,  color: "text-orange-600 dark:text-orange-400" },
-            { label: "Net Surplus", value: netSurplus,       color: netSurplus >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400" },
-          ].map(({ label, value, color }) => (
+            { label: "Income",      value: monthlyIncome,    sub: bankCreditAmt > 0 ? `incl. ₹${bankCreditAmt.toLocaleString("en-IN")} from bank` : null, color: "text-green-600 dark:text-green-400" },
+            { label: "EMIs",        value: totalEmi,         sub: null, color: "text-red-600 dark:text-red-400" },
+            { label: "Expenses",    value: monthlyExpenses,  sub: bankDebitAmt > 0 ? `incl. ₹${bankDebitAmt.toLocaleString("en-IN")} from bank` : null, color: "text-orange-600 dark:text-orange-400" },
+            { label: "Net Surplus", value: netSurplus,       sub: null, color: netSurplus >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400" },
+          ].map(({ label, value, sub, color }) => (
             <div key={label} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
               <p className="text-xs text-text-muted uppercase tracking-wider">{label}</p>
               <p className={`text-2xl font-bold mt-1 ${color}`}>{fmtINR(value)}</p>
+              {sub && <p className="text-[10px] text-text-muted mt-0.5">{sub}</p>}
             </div>
           ))}
         </div>
