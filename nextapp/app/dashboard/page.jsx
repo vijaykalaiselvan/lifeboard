@@ -94,20 +94,20 @@ export default function DashboardPage() {
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Net Worth</p>
                   <p className={`text-2xl font-bold mt-1 ${data.finance.netWorth >= 0 ? "text-green-500" : "text-red-500"}`}>
-                    {fmt(data.finance.netWorth)}
+                    {fmtINR(data.finance.netWorth)}
                   </p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Income</p>
-                  <p className="text-2xl font-bold text-green-500 mt-1">{fmt(data.finance.totalIncome)}</p>
+                  <p className="text-2xl font-bold text-green-500 mt-1">{fmtINR(data.finance.totalIncome)}</p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Expenses</p>
-                  <p className="text-2xl font-bold text-red-500 mt-1">{fmt(data.finance.totalExpenses)}</p>
+                  <p className="text-2xl font-bold text-red-500 mt-1">{fmtINR(data.finance.totalExpenses)}</p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Investments</p>
-                  <p className="text-2xl font-bold text-accent mt-1">{fmt(data.finance.totalInvested)}</p>
+                  <p className="text-2xl font-bold text-accent mt-1">{fmtINR(data.finance.totalInvested)}</p>
                 </Card>
               </div>
             </div>

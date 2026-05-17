@@ -11,7 +11,11 @@ export async function GET(request) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
 
-  const [incomes, expenses, investments, debts, tasks, habits, goals] = await Promise.all([
+  // First day of current month
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd   = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const [incomes, expenses, investments, debts, tasks, habits, goals, bankCredits, bankDebits] = await Promise.all([
     prisma.income.findMany({ where: { profileId } }),
     prisma.expense.findMany({ where: { profileId } }),
     prisma.investment.findMany({ where: { profileId } }),
@@ -19,43 +23,57 @@ export async function GET(request) {
     prisma.task.findMany({ where: { profileId } }),
     prisma.habit.findMany({ where: { profileId, active: true }, include: { logs: { where: { date: today } } } }),
     prisma.goal.findMany({ where: { profileId, status: "active" } }),
+    prisma.transaction.findMany({ where: { profileId, type: "credit", date: { gte: monthStart, lte: monthEnd } } }),
+    prisma.transaction.findMany({ where: { profileId, type: "debit",  date: { gte: monthStart, lte: monthEnd } } }),
   ]);
 
-  const monthlyIncome = incomes.filter((i) => i.frequency === "monthly").reduce((s, i) => s + i.amount, 0);
-  const totalEmi = debts.reduce((s, d) => s + (d.minimumPayment ?? 0), 0);
-  const totalMonthlyExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-  const netSurplus = monthlyIncome - totalEmi - totalMonthlyExpenses;
-  const emiRatio = monthlyIncome > 0 ? (totalEmi / monthlyIncome) * 100 : 0;
+  // Manual entries
+  const manualMonthlyIncome  = incomes.filter((i) => i.frequency === "monthly").reduce((s, i) => s + i.amount, 0);
+  const manualMonthlyExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const totalEmi             = debts.reduce((s, d) => s + (d.minimumPayment ?? 0), 0);
+
+  // Bank transactions this month
+  const bankCreditTotal = bankCredits.reduce((s, t) => s + t.amount, 0);
+  const bankDebitTotal  = bankDebits.filter((t) => t.category !== "Debt").reduce((s, t) => s + t.amount, 0);
+
+  const monthlyIncome   = manualMonthlyIncome + bankCreditTotal;
+  const monthlyExpenses = manualMonthlyExpenses + bankDebitTotal;
+  const netSurplus  = monthlyIncome - totalEmi - monthlyExpenses;
+  const emiRatio    = monthlyIncome > 0 ? (totalEmi / monthlyIncome) * 100 : 0;
   const savingsRate = monthlyIncome > 0 ? (netSurplus / monthlyIncome) * 100 : 0;
 
+  // All-time totals (manual + bank)
+  const allBankCredits = await prisma.transaction.aggregate({ where: { profileId, type: "credit" }, _sum: { amount: true } });
+  const allBankDebits  = await prisma.transaction.aggregate({ where: { profileId, type: "debit"  }, _sum: { amount: true } });
+
+  const totalIncome   = incomes.reduce((s, i) => s + i.amount, 0)  + (allBankCredits._sum.amount ?? 0);
+  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0) + (allBankDebits._sum.amount  ?? 0);
+  const totalInvested = investments.reduce((s, i) => s + i.currentValue, 0);
+  const totalDebt     = debts.reduce((s, d) => s + d.principal, 0);
+  const netWorth      = totalInvested - totalDebt;
+
   return NextResponse.json({
-    finance: {
-      totalIncome: incomes.reduce((s, i) => s + i.amount, 0),
-      totalExpenses: expenses.reduce((s, e) => s + e.amount, 0),
-      netWorth: investments.reduce((s, i) => s + i.currentValue, 0) - debts.reduce((s, d) => s + d.principal, 0),
-      totalInvested: investments.reduce((s, i) => s + i.currentValue, 0),
-      totalDebt: debts.reduce((s, d) => s + d.principal, 0),
-    },
+    finance: { totalIncome, totalExpenses, netWorth, totalInvested, totalDebt },
     healthIndicators: {
       monthlyIncome,
       totalEmi,
-      totalExpenses: totalMonthlyExpenses,
+      totalExpenses: monthlyExpenses,
       netSurplus,
-      emiRatio: parseFloat(emiRatio.toFixed(1)),
+      emiRatio:    parseFloat(emiRatio.toFixed(1)),
       savingsRate: parseFloat(savingsRate.toFixed(1)),
     },
     tasks: {
-      total: tasks.length,
-      todo: tasks.filter((t) => t.status === "todo").length,
+      total:      tasks.length,
+      todo:       tasks.filter((t) => t.status === "todo").length,
       inProgress: tasks.filter((t) => t.status === "in-progress").length,
-      done: tasks.filter((t) => t.status === "done").length,
+      done:       tasks.filter((t) => t.status === "done").length,
     },
     habits: {
-      total: habits.length,
+      total:          habits.length,
       completedToday: habits.filter((h) => h.logs.some((l) => l.completed)).length,
     },
     goals: {
-      total: goals.length,
+      total:       goals.length,
       avgProgress: goals.length ? Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length) : 0,
     },
   });
