@@ -45,7 +45,7 @@ model Income {
   profileId  Int
   source     String
   amount     Float
-  currency   String   @default("USD")
+  currency   String   @default("INR")
   frequency  String
   receivedAt DateTime @default(now())
   note       String?
@@ -94,7 +94,7 @@ model Debt {
   interestRate   Float
   minimumPayment Float?
   dueDate        DateTime?
-  currency       String    @default("USD")
+  currency       String    @default("INR")
   notes          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

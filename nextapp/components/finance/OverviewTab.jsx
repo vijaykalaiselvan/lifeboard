@@ -6,9 +6,6 @@ function fmtINR(n) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
-function fmtCcy(n, currency) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: currency || "INR", maximumFractionDigits: 0 }).format(n);
-}
 
 function payoffMonths(principal, interestRate, minimumPayment) {
   if (!minimumPayment || minimumPayment <= 0) return null;
@@ -181,11 +178,11 @@ export default function OverviewTab() {
                           </div>
                         </td>
                         <td className="px-5 py-3.5 text-right font-medium text-red-600 dark:text-red-400">
-                          {fmtCcy(debt.principal, debt.currency)}
+                          {fmtINR(debt.principal)}
                         </td>
                         <td className="px-5 py-3.5 text-right text-orange-600 dark:text-orange-400">{debt.interestRate}%</td>
                         <td className="px-5 py-3.5 text-right text-text-secondary">
-                          {debt.minimumPayment ? fmtCcy(debt.minimumPayment, debt.currency) : "—"}
+                          {debt.minimumPayment ? fmtINR(debt.minimumPayment) : "—"}
                         </td>
                         <td className="px-5 py-3.5 text-right">
                           {closeDate ? (
@@ -223,13 +220,13 @@ export default function OverviewTab() {
                         </p>
                       </div>
                       <p className="text-right font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
-                        {fmtCcy(debt.principal, debt.currency)}
+                        {fmtINR(debt.principal)}
                       </p>
                     </div>
                     <div className="flex justify-between items-baseline pt-2 border-t border-border">
                       <span className="text-xs text-text-muted">EMI / month</span>
                       <span className="text-sm text-text-secondary">
-                        {debt.minimumPayment ? fmtCcy(debt.minimumPayment, debt.currency) : "—"}
+                        {debt.minimumPayment ? fmtINR(debt.minimumPayment) : "—"}
                       </span>
                     </div>
                   </div>

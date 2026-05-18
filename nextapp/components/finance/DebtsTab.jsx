@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 
-const EMPTY = { name: "", type: "loan", principal: "", interestRate: "", minimumPayment: "", dueDate: "", currency: "USD", notes: "" };
+const EMPTY = { name: "", type: "loan", principal: "", interestRate: "", minimumPayment: "", dueDate: "", currency: "INR", notes: "" };
 const TYPES = ["credit-card", "loan", "mortgage", "other"];
 const TYPE_ICONS = { "credit-card": "💳", loan: "🏦", mortgage: "🏠", other: "📋" };
 
-function fmt(n, currency = "USD") {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
+function fmt(n) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
 function payoffMonths(principal, interestRate, minimumPayment) {
@@ -165,7 +165,7 @@ export default function DebtsTab() {
                 <p className="font-medium text-text-primary">{item.name}</p>
                 <div className="flex flex-wrap gap-3 mt-0.5">
                   <span className="text-xs text-orange-600 dark:text-orange-400">{item.interestRate}% APR</span>
-                  {item.minimumPayment && <span className="text-xs text-text-muted">EMI: {fmt(item.minimumPayment, item.currency)}/mo</span>}
+                  {item.minimumPayment && <span className="text-xs text-text-muted">EMI: {fmt(item.minimumPayment)}/mo</span>}
                   {item.dueDate && <span className="text-xs text-text-muted">Due: {new Date(item.dueDate).toLocaleDateString()}</span>}
                   {(() => {
                     const mo = payoffMonths(item.principal, item.interestRate, item.minimumPayment);
@@ -174,7 +174,7 @@ export default function DebtsTab() {
                 </div>
                 {item.notes && <p className="text-xs text-text-muted mt-0.5">{item.notes}</p>}
               </div>
-              <span className="text-red-600 dark:text-red-400 font-semibold text-lg whitespace-nowrap">{fmt(item.principal, item.currency)}</span>
+              <span className="text-red-600 dark:text-red-400 font-semibold text-lg whitespace-nowrap">{fmt(item.principal)}</span>
               <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                 <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                 <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>

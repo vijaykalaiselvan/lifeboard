@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 
-const EMPTY = { name: "", type: "stocks", currentValue: "", costBasis: "", currency: "USD", notes: "" };
+const EMPTY = { name: "", type: "stocks", currentValue: "", costBasis: "", currency: "INR", notes: "" };
 const TYPES = ["stocks", "crypto", "real-estate", "bonds", "other"];
 const TYPE_ICONS = { stocks: "📈", crypto: "₿", "real-estate": "🏠", bonds: "📄", other: "💼" };
 
-function fmt(n, currency = "USD") {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
+function fmt(n) {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
 export default function InvestmentsTab() {
@@ -105,11 +105,6 @@ export default function InvestmentsTab() {
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent" />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-text-secondary">Currency</label>
-              <input value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent" />
-            </div>
-            <div className="space-y-1">
               <label className="text-xs text-text-secondary">Notes</label>
               <input value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
@@ -139,7 +134,7 @@ export default function InvestmentsTab() {
                 <span className="text-2xl">{TYPE_ICONS[item.type] ?? "💼"}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-text-primary">{item.name}</p>
-                  <p className="text-xs text-text-muted">Cost: {fmt(item.costBasis, item.currency)}</p>
+                  <p className="text-xs text-text-muted">Cost: {fmt(item.costBasis)}</p>
                   {item.notes && <p className="text-xs text-text-muted">{item.notes}</p>}
                 </div>
                 {pct && (
@@ -147,7 +142,7 @@ export default function InvestmentsTab() {
                     {gain >= 0 ? "+" : ""}{pct}%
                   </span>
                 )}
-                <span className="text-accent font-semibold text-lg whitespace-nowrap">{fmt(item.currentValue, item.currency)}</span>
+                <span className="text-accent font-semibold text-lg whitespace-nowrap">{fmt(item.currentValue)}</span>
                 <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                   <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                   <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
