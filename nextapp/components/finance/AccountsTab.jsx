@@ -9,7 +9,7 @@ const ACCOUNT_TYPES = [
   { value: "current",     label: "Current Account" },
   { value: "credit-card", label: "Credit Card" },
 ];
-const COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6", "#f97316", "#06b6d4"];
+const COLORS = ["#7c3aed", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6", "#f97316", "#06b6d4"];
 const BANK_ICONS = { HDFC: "🏦", SBI: "🏛️", Axis: "🔵", BOB: "🟠", ICICI: "💎", Other: "🏦" };
 
 const EMPTY = { name: "", bankName: "HDFC", accountType: "savings", lastFourDigits: "", currency: "INR", color: COLORS[0] };

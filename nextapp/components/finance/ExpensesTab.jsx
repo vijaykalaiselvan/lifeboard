@@ -5,7 +5,7 @@ import api from "@/lib/api";
 const EMPTY = { category: "", description: "", amount: "", currency: "INR", spentAt: "", note: "" };
 const CATEGORIES = ["Housing", "Food", "Transport", "Health", "Entertainment", "Shopping", "Education", "Utilities", "Other"];
 const CAT_COLORS = {
-  Housing:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
+  Housing:       "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
   Food:          "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300",
   Transport:     "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300",
   Health:        "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300",
@@ -260,7 +260,7 @@ export default function ExpensesTab() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#6366f1" }} />
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
                         <span className="text-xs text-text-muted">{txn.account?.name}</span>
                       </div>
                     </td>

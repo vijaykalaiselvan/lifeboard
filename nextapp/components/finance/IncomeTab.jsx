@@ -208,7 +208,7 @@ export default function IncomeTab() {
                   <td className="px-4 py-3 text-text-primary max-w-xs truncate">{txn.description}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#6366f1" }} />
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
                       <span className="text-xs text-text-muted">{txn.account?.name}</span>
                     </div>
                   </td>

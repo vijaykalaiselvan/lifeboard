@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import api from "@/lib/api";
 
-const COLORS = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"];
+const COLORS = ["#7c3aed", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6"];
 const EMPTY = { name: "", description: "", frequency: "daily", color: COLORS[0], icon: "" };
 
 function isoDate(d) {

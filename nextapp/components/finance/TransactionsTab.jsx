@@ -12,7 +12,7 @@ const CAT_COLORS = {
   Entertainment: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300",
   Health:        "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300",
   Education:     "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300",
-  Housing:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300",
+  Housing:       "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
   Debt:          "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300",
   Income:        "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
   Other:         "bg-bg-elevated text-text-secondary",
@@ -197,7 +197,7 @@ export default function TransactionsTab() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#6366f1" }} />
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
                           <span className="text-xs text-text-muted truncate max-w-24">{txn.account?.name}</span>
                         </div>
                       </td>
