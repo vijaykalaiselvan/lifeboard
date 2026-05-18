@@ -1,6 +1,15 @@
 /* ============================================================
    nextapp/app/globals.css
-   Violet + warm-stone palette
+   Drop-in replacement that switches Lifeboard to an iOS visual
+   language: system blue accent, warm-stone neutrals, translucent
+   bars, borderless grouped cards, large titles, generous radii,
+   SF Pro typography. Light + dark both included.
+
+   Nothing else in your app needs to change — every component
+   reads from these CSS variables already. The visual overrides
+   are scoped to standard Tailwind utility classes the codebase
+   already uses (.border, .rounded-xl, .shadow-sm, etc.) so they
+   apply globally without touching any JSX.
    ============================================================ */
 
 @import "tailwindcss";
@@ -8,28 +17,28 @@
 /* Tailwind v4: class-based dark mode (next-themes adds .dark to <html>) */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ---------- LIGHT MODE — violet accent + warm-stone neutrals ---------- */
+/* ---------- LIGHT MODE — iOS Blue accent + Warm-Stone neutrals ------- */
 :root {
   /* Surfaces — warm stone ramp */
-  --color-bg-base:        #fafaf9;   /* stone-50  — page background */
-  --color-bg-surface:     #ffffff;   /* card / panel background     */
-  --color-bg-elevated:    #f5f5f4;   /* stone-100 — inputs, chips   */
-  --color-border:         #e7e5e4;   /* stone-200 — hairline        */
+  --color-bg-base:        #fafaf9;
+  --color-bg-surface:     #ffffff;
+  --color-bg-elevated:    #f5f5f4;
+  --color-border:         #e7e5e4;
 
   /* Text */
-  --color-text-primary:   #1c1917;   /* stone-900 */
-  --color-text-secondary: #57534e;   /* stone-600 */
-  --color-text-muted:     #a8a29e;   /* stone-400 */
+  --color-text-primary:   #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-muted:     #a8a29e;
 
-  /* Brand accent — violet */
-  --color-accent:         #7c3aed;   /* violet-600 — primary CTA   */
-  --color-accent-bg:      #f3e8ff;   /* violet-100 — soft tint     */
+  /* Brand accent — iOS system blue */
+  --color-accent:         #007aff;
+  --color-accent-bg:      #e5f0ff;
 }
 
-/* ---------- DARK MODE — same palette, dark warm surfaces -------------- */
+/* ---------- DARK MODE ------------------------------------------------ */
 .dark {
-  --color-bg-base:        #0c0a09;   /* stone-950 */
-  --color-bg-surface:     #1c1917;   /* stone-900 */
+  --color-bg-base:        #0c0a09;
+  --color-bg-surface:     #1c1917;
   --color-bg-elevated:    #262422;
   --color-border:         #3a3633;
 
@@ -37,12 +46,11 @@
   --color-text-secondary: #a8a29e;
   --color-text-muted:     #57534e;
 
-  --color-accent:         #a78bfa;   /* violet-400 — lighter for dark */
-  --color-accent-bg:      #2e1065;   /* violet-950                    */
+  --color-accent:         #0a84ff;       /* iOS dark-mode blue */
+  --color-accent-bg:      #001f4d;
 }
 
-/* Register as Tailwind utilities so bg-bg-surface, text-text-primary,
-   bg-accent, etc. work. */
+/* Register as Tailwind utilities (bg-bg-surface, text-text-primary, etc.) */
 @theme inline {
   --color-bg-base:         var(--color-bg-base);
   --color-bg-surface:      var(--color-bg-surface);
@@ -55,13 +63,147 @@
   --color-accent-bg:       var(--color-accent-bg);
 }
 
+/* ---------- TYPOGRAPHY — SF stack ----------------------------------- */
 html {
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, "SF Pro Text", "SF Pro Display",
+               BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+               Arial, sans-serif;
+  font-feature-settings: "ss01", "cv01", "cv11";
 }
 
 body {
   background-color: var(--color-bg-base);
   color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ============================================================
+   iOS visual overrides — scoped to Tailwind utility selectors
+   so they apply globally without touching JSX.
+   ============================================================ */
+
+/* ---------- Radii: bump cards 12 → 16, buttons 8 → 12 --------------- */
+.rounded-md  { border-radius: 8px; }
+.rounded-lg  { border-radius: 12px; }
+.rounded-xl  { border-radius: 16px; }
+.rounded-2xl { border-radius: 20px; }
+
+/* ---------- Cards: lose visible 1-px border + shadow ---------------- */
+/* Visual separation comes from surface contrast (white card on stone bg)
+   instead of a hairline rectangle. This is the single biggest visual
+   shift between Material and iOS. */
+.bg-bg-surface.border.rounded-xl,
+.bg-bg-surface.border.rounded-2xl,
+.bg-bg-surface.border-border.rounded-xl,
+.bg-bg-surface.border-border.rounded-2xl {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* But keep hairlines INSIDE cards (table rows, dividers, list separators) */
+table tr,
+table th,
+table td,
+.divide-y > * + *,
+.border-t,
+.border-b {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.dark table tr,
+.dark table th,
+.dark table td,
+.dark .divide-y > * + *,
+.dark .border-t,
+.dark .border-b {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Large-title page heading -------------------------------- */
+/* On the Dashboard, Tasks, Habits, etc. pages, h1.text-2xl gets the
+   iOS large-title treatment. */
+h1.text-2xl,
+h1.text-3xl {
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+}
+@media (min-width: 768px) {
+  h1.text-2xl,
+  h1.text-3xl {
+    font-size: 40px;
+  }
+}
+
+/* Stat values: tighter tracking */
+.font-bold {
+  letter-spacing: -0.015em;
+}
+
+/* Section labels: less shouty than the original tracking-widest */
+.uppercase.tracking-widest {
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Top bar: translucent, blurred --------------------------- */
+header.sticky {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+.dark header.sticky {
+  background: rgba(28, 25, 23, 0.72);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Bottom dock: same translucent treatment ----------------- */
+nav.fixed.bottom-0 {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+.dark nav.fixed.bottom-0 {
+  background: rgba(28, 25, 23, 0.85);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Form inputs: borderless on the elevated surface --------- */
+input.bg-bg-elevated,
+select.bg-bg-elevated,
+textarea.bg-bg-elevated {
+  border-color: transparent !important;
+  border-radius: 12px;
+}
+input.bg-bg-elevated:focus,
+select.bg-bg-elevated:focus,
+textarea.bg-bg-elevated:focus {
+  border-color: var(--color-accent) !important;
+}
+
+/* ---------- Buttons: tactile press feedback ------------------------- */
+button.bg-accent {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+/* ---------- Sidebar (desktop): softer hairlines --------------------- */
+aside.hidden.md\:flex,
+aside.hidden.md\:flex .border-border {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.dark aside.hidden.md\:flex,
+.dark aside.hidden.md\:flex .border-border {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Badges: medium weight (iOS feel) ------------------------ */
+.rounded-full {
+  font-weight: 500;
 }
