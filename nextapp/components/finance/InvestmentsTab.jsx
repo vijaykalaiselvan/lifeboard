@@ -53,33 +53,34 @@ export default function InvestmentsTab() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Portfolio Value</p>
-          <p className="text-3xl font-bold text-accent mt-1">{fmt(totalValue)}</p>
+          <p className="text-2xl md:text-3xl font-bold text-accent mt-1">{fmt(totalValue)}</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Invested</p>
-          <p className="text-3xl font-bold text-text-primary mt-1">{fmt(totalCost)}</p>
+          <p className="text-2xl md:text-3xl font-bold text-text-primary mt-1">{fmt(totalCost)}</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Gain / Loss</p>
-          <p className={`text-3xl font-bold mt-1 ${totalGain >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+          <p className={`text-2xl md:text-3xl font-bold mt-1 ${totalGain >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
             {totalGain >= 0 ? "+" : ""}{fmt(totalGain)}
           </p>
           {gainPct && <p className={`text-xs mt-0.5 ${totalGain >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"}`}>{totalGain >= 0 ? "+" : ""}{gainPct}%</p>}
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-text-primary">Investments</h2>
-        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">+ Add Investment</button>
+        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">+ Add Investment</button>
       </div>
 
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Investment" : "New Investment"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-text-secondary">Name</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -114,7 +115,7 @@ export default function InvestmentsTab() {
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                 placeholder="Optional" />
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                 {editing ? "Save changes" : "Add investment"}
@@ -134,7 +135,7 @@ export default function InvestmentsTab() {
             const gain = item.currentValue - item.costBasis;
             const pct = item.costBasis > 0 ? ((gain / item.costBasis) * 100).toFixed(1) : null;
             return (
-              <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-4 hover:border-border transition-colors shadow-sm">
+              <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-4 md:px-5 py-3.5 md:py-4 flex items-center gap-3 md:gap-4 hover:border-border transition-colors shadow-sm">
                 <span className="text-2xl">{TYPE_ICONS[item.type] ?? "💼"}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-text-primary">{item.name}</p>
@@ -142,12 +143,12 @@ export default function InvestmentsTab() {
                   {item.notes && <p className="text-xs text-text-muted">{item.notes}</p>}
                 </div>
                 {pct && (
-                  <span className={`text-xs px-2 py-1 rounded-full ${gain >= 0 ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"}`}>
+                  <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${gain >= 0 ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300" : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"}`}>
                     {gain >= 0 ? "+" : ""}{pct}%
                   </span>
                 )}
-                <span className="text-accent font-semibold text-lg">{fmt(item.currentValue, item.currency)}</span>
-                <div className="flex gap-2">
+                <span className="text-accent font-semibold text-lg whitespace-nowrap">{fmt(item.currentValue, item.currency)}</span>
+                <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                   <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                   <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
                 </div>

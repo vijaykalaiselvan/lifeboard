@@ -78,30 +78,31 @@ export default function DebtsTab() {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Debt</p>
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-1">{fmt(totalDebt)}</p>
+          <p className="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-400 mt-1">{fmt(totalDebt)}</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Min. Monthly Payment</p>
-          <p className="text-3xl font-bold text-text-primary mt-1">{fmt(totalMinPayment)}</p>
+          <p className="text-2xl md:text-3xl font-bold text-text-primary mt-1">{fmt(totalMinPayment)}</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Avg. Interest Rate</p>
-          <p className="text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">{avgRate ? `${avgRate}%` : "—"}</p>
+          <p className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">{avgRate ? `${avgRate}%` : "—"}</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-text-primary">Debts</h2>
-        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">+ Add Debt</button>
+        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">+ Add Debt</button>
       </div>
 
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Debt" : "New Debt"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-text-secondary">Name</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -135,13 +136,13 @@ export default function DebtsTab() {
               <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent" />
             </div>
-            <div className="col-span-2 space-y-1">
+            <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-text-secondary">Notes</label>
               <input value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                 placeholder="Optional" />
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                 {editing ? "Save changes" : "Add debt"}
@@ -158,7 +159,7 @@ export default function DebtsTab() {
       ) : (
         <div className="space-y-2">
           {items.map((item) => (
-            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-4 hover:border-border transition-colors shadow-sm">
+            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-4 md:px-5 py-3.5 md:py-4 flex items-center gap-3 md:gap-4 hover:border-border transition-colors shadow-sm">
               <span className="text-2xl">{TYPE_ICONS[item.type] ?? "📋"}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary">{item.name}</p>
@@ -173,8 +174,8 @@ export default function DebtsTab() {
                 </div>
                 {item.notes && <p className="text-xs text-text-muted mt-0.5">{item.notes}</p>}
               </div>
-              <span className="text-red-600 dark:text-red-400 font-semibold text-lg">{fmt(item.principal, item.currency)}</span>
-              <div className="flex gap-2">
+              <span className="text-red-600 dark:text-red-400 font-semibold text-lg whitespace-nowrap">{fmt(item.principal, item.currency)}</span>
+              <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                 <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                 <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
               </div>

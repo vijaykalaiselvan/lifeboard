@@ -3,17 +3,13 @@ import { useState, useEffect } from "react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import api from "@/lib/api";
 
-function fmt(n, currency = "USD") {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n);
-}
-
 function fmtINR(n) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 }
 
 function Card({ children, className = "" }) {
   return (
-    <div className={`bg-bg-surface border border-border rounded-xl p-5 shadow-sm ${className}`}>
+    <div className={`bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -37,10 +33,11 @@ export default function DashboardPage() {
 
   return (
     <ProtectedLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-          <p className="text-sm text-text-muted mt-0.5">Welcome back — here's your overview.</p>
+      {/* p-4 on mobile, p-6 desktop. tracking-tight on bigger title. */}
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="mb-5 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight">Dashboard</h1>
+          <p className="text-sm text-text-muted mt-1">Welcome back — here's your overview.</p>
         </div>
 
         {loading ? (
@@ -48,11 +45,11 @@ export default function DashboardPage() {
         ) : !data ? (
           <p className="text-text-muted text-sm">Failed to load dashboard.</p>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 md:space-y-8">
             {data.healthIndicators && (
               <div>
                 <SectionLabel>Financial Health</SectionLabel>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                   <Card>
                     <p className="text-xs text-text-muted uppercase tracking-wider">Net Monthly Surplus</p>
                     <p className={`text-2xl font-bold mt-1 ${data.healthIndicators.netSurplus >= 0 ? "text-green-500" : "text-red-500"}`}>
@@ -62,7 +59,7 @@ export default function DashboardPage() {
                   </Card>
                   <Card>
                     <p className="text-xs text-text-muted uppercase tracking-wider">EMI Ratio</p>
-                    <div className="flex items-end gap-2 mt-1">
+                    <div className="flex items-end gap-2 mt-1 flex-wrap">
                       <p className={`text-2xl font-bold ${data.healthIndicators.emiRatio >= 55 ? "text-red-500" : data.healthIndicators.emiRatio >= 40 ? "text-yellow-500" : "text-green-500"}`}>
                         {data.healthIndicators.emiRatio}%
                       </p>
@@ -74,7 +71,7 @@ export default function DashboardPage() {
                   </Card>
                   <Card>
                     <p className="text-xs text-text-muted uppercase tracking-wider">Savings Rate</p>
-                    <div className="flex items-end gap-2 mt-1">
+                    <div className="flex items-end gap-2 mt-1 flex-wrap">
                       <p className={`text-2xl font-bold ${data.healthIndicators.savingsRate < 10 ? "text-red-500" : data.healthIndicators.savingsRate < 20 ? "text-yellow-500" : "text-green-500"}`}>
                         {data.healthIndicators.savingsRate}%
                       </p>
@@ -90,28 +87,29 @@ export default function DashboardPage() {
 
             <div>
               <SectionLabel>Finance</SectionLabel>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {/* 2-col mobile → 3-col tablet → 5-col desktop. Last tile spans 2 cols on mobile so the layout has no orphan. */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Net Worth</p>
-                  <p className={`text-2xl font-bold mt-1 ${data.finance.netWorth >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  <p className={`text-xl md:text-2xl font-bold mt-1 ${data.finance.netWorth >= 0 ? "text-green-500" : "text-red-500"}`}>
                     {fmtINR(data.finance.netWorth)}
                   </p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Income</p>
-                  <p className="text-2xl font-bold text-green-500 mt-1">{fmtINR(data.finance.totalIncome)}</p>
+                  <p className="text-xl md:text-2xl font-bold text-green-500 mt-1">{fmtINR(data.finance.totalIncome)}</p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Total Expenses</p>
-                  <p className="text-2xl font-bold text-red-500 mt-1">{fmtINR(data.finance.totalExpenses)}</p>
+                  <p className="text-xl md:text-2xl font-bold text-red-500 mt-1">{fmtINR(data.finance.totalExpenses)}</p>
                 </Card>
                 <Card>
                   <p className="text-xs text-text-muted uppercase tracking-wider">Investments</p>
-                  <p className="text-2xl font-bold text-accent mt-1">{fmtINR(data.finance.totalInvested)}</p>
+                  <p className="text-xl md:text-2xl font-bold text-accent mt-1">{fmtINR(data.finance.totalInvested)}</p>
                 </Card>
-                <Card>
+                <Card className="col-span-2 md:col-span-1">
                   <p className="text-xs text-text-muted uppercase tracking-wider">Lent Outstanding</p>
-                  <p className={`text-2xl font-bold mt-1 ${data.lent.totalOutstanding > 0 ? "text-yellow-500" : "text-green-500"}`}>
+                  <p className={`text-xl md:text-2xl font-bold mt-1 ${data.lent.totalOutstanding > 0 ? "text-yellow-500" : "text-green-500"}`}>
                     {fmtINR(data.lent.totalOutstanding)}
                   </p>
                   <p className="text-xs text-text-muted mt-1">{data.lent.peopleCount} {data.lent.peopleCount === 1 ? "person" : "people"} owe you</p>
@@ -119,7 +117,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               <Card>
                 <SectionLabel>Tasks</SectionLabel>
                 <div className="space-y-2">

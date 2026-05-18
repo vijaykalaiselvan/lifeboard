@@ -88,31 +88,31 @@ export default function OverviewTab() {
   const now = new Date();
 
   return (
-    <div className="space-y-6">
-      {/* Monthly Cash Flow */}
+    <div className="space-y-6 md:space-y-8">
+      {/* Monthly Cash Flow — 2 col mobile → 4 col desktop */}
       <section>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Monthly Cash Flow</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {[
             { label: "Income",      value: monthlyIncome,    sub: bankCreditAmt > 0 ? `incl. ₹${bankCreditAmt.toLocaleString("en-IN")} from bank` : null, color: "text-green-600 dark:text-green-400" },
             { label: "EMIs",        value: totalEmi,         sub: null, color: "text-red-600 dark:text-red-400" },
             { label: "Expenses",    value: monthlyExpenses,  sub: bankDebitAmt > 0 ? `incl. ₹${bankDebitAmt.toLocaleString("en-IN")} from bank` : null, color: "text-orange-600 dark:text-orange-400" },
             { label: "Net Surplus", value: netSurplus,       sub: null, color: netSurplus >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400" },
           ].map(({ label, value, sub, color }) => (
-            <div key={label} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div key={label} className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
               <p className="text-xs text-text-muted uppercase tracking-wider">{label}</p>
-              <p className={`text-2xl font-bold mt-1 ${color}`}>{fmtINR(value)}</p>
+              <p className={`text-xl md:text-2xl font-bold mt-1 ${color}`}>{fmtINR(value)}</p>
               {sub && <p className="text-[10px] text-text-muted mt-0.5">{sub}</p>}
             </div>
           ))}
         </div>
       </section>
 
-      {/* Financial Health */}
+      {/* Financial Health — 1 col mobile → 2 col desktop */}
       <section>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Financial Health</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-text-primary">EMI-to-Income Ratio</p>
               <Badge color={emiRatio >= 55 ? "red" : emiRatio >= 40 ? "yellow" : "green"}>
@@ -129,7 +129,7 @@ export default function OverviewTab() {
             </div>
           </div>
 
-          <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-text-primary">Savings Rate</p>
               <Badge color={savingsRate < 10 ? "red" : savingsRate < 20 ? "yellow" : "green"}>
@@ -148,56 +148,95 @@ export default function OverviewTab() {
         </div>
       </section>
 
-      {/* Debt Payoff Timeline */}
+      {/* Debt Payoff — table on desktop, card list on mobile.
+          This is the highest-value mobile change here: the original 5-column
+          table overflows the viewport on a 390px screen and forces a janky
+          horizontal scroll. */}
       <section>
         <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Debt Payoff Timeline</p>
         {debts.length === 0 ? (
           <p className="text-text-muted text-sm">No debts tracked.</p>
         ) : (
-          <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-bg-elevated">
-                  {["Debt", "Balance", "Rate", "EMI / mo", "Closes"].map((h, i) => (
-                    <th key={h} className={`px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider ${i === 0 ? "text-left" : "text-right"}`}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {sortedDebts.map((debt, idx) => {
-                  const months = payoffMonths(debt.principal, debt.interestRate, debt.minimumPayment);
-                  const closeDate = months ? addMonths(now, months) : null;
-                  return (
-                    <tr key={debt.id} className="hover:bg-bg-elevated/50 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-text-primary">{debt.name}</span>
+          <>
+            {/* Desktop: real table */}
+            <div className="hidden md:block bg-bg-surface border border-border rounded-xl shadow-sm overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-bg-elevated">
+                    {["Debt", "Balance", "Rate", "EMI / mo", "Closes"].map((h, i) => (
+                      <th key={h} className={`px-5 py-3 text-xs font-medium text-text-muted uppercase tracking-wider ${i === 0 ? "text-left" : "text-right"}`}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {sortedDebts.map((debt, idx) => {
+                    const months = payoffMonths(debt.principal, debt.interestRate, debt.minimumPayment);
+                    const closeDate = months ? addMonths(now, months) : null;
+                    return (
+                      <tr key={debt.id} className="hover:bg-bg-elevated/50 transition-colors">
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-text-primary">{debt.name}</span>
+                            {idx === 0 && <Badge color="red">Pay First</Badge>}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 text-right font-medium text-red-600 dark:text-red-400">
+                          {fmtCcy(debt.principal, debt.currency)}
+                        </td>
+                        <td className="px-5 py-3.5 text-right text-orange-600 dark:text-orange-400">{debt.interestRate}%</td>
+                        <td className="px-5 py-3.5 text-right text-text-secondary">
+                          {debt.minimumPayment ? fmtCcy(debt.minimumPayment, debt.currency) : "—"}
+                        </td>
+                        <td className="px-5 py-3.5 text-right">
+                          {closeDate ? (
+                            <span className="text-text-primary">
+                              {closeDate.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                              <span className="text-text-muted text-xs ml-1.5">({months} mo)</span>
+                            </span>
+                          ) : (
+                            <span className="text-text-muted">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile: stacked cards */}
+            <div className="md:hidden space-y-3">
+              {sortedDebts.map((debt, idx) => {
+                const months = payoffMonths(debt.principal, debt.interestRate, debt.minimumPayment);
+                const closeDate = months ? addMonths(now, months) : null;
+                return (
+                  <div key={debt.id} className="bg-bg-surface border border-border rounded-xl shadow-sm p-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium text-text-primary">{debt.name}</p>
                           {idx === 0 && <Badge color="red">Pay First</Badge>}
                         </div>
-                      </td>
-                      <td className="px-5 py-3.5 text-right font-medium text-red-600 dark:text-red-400">
+                        <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+                          {debt.interestRate}% interest
+                          {closeDate && <span> · closes {closeDate.toLocaleDateString("en-IN", { month: "short", year: "numeric" })} ({months} mo)</span>}
+                        </p>
+                      </div>
+                      <p className="text-right font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
                         {fmtCcy(debt.principal, debt.currency)}
-                      </td>
-                      <td className="px-5 py-3.5 text-right text-orange-600 dark:text-orange-400">{debt.interestRate}%</td>
-                      <td className="px-5 py-3.5 text-right text-text-secondary">
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-baseline pt-2 border-t border-border">
+                      <span className="text-xs text-text-muted">EMI / month</span>
+                      <span className="text-sm text-text-secondary">
                         {debt.minimumPayment ? fmtCcy(debt.minimumPayment, debt.currency) : "—"}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        {closeDate ? (
-                          <span className="text-text-primary">
-                            {closeDate.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
-                            <span className="text-text-muted text-xs ml-1.5">({months} mo)</span>
-                          </span>
-                        ) : (
-                          <span className="text-text-muted">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
     </div>

@@ -81,24 +81,25 @@ export default function TasksPage() {
 
   return (
     <ProtectedLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-text-primary">Tasks</h1>
-          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between gap-3 mb-5 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight">Tasks</h1>
+          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
             + New Task
           </button>
         </div>
 
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        {/* Stat tiles: 2 cols mobile → 4 cols desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-5 md:mb-6">
           {[
             { label: "Total",       value: counts.total,      color: "text-text-primary" },
             { label: "To Do",       value: counts.todo,       color: "text-text-secondary" },
             { label: "In Progress", value: counts.inProgress, color: "text-yellow-600 dark:text-yellow-400" },
             { label: "Done",        value: counts.done,       color: "text-green-600 dark:text-green-400" },
           ].map(({ label, value, color }) => (
-            <div key={label} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div key={label} className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
               <p className="text-xs text-text-muted uppercase tracking-wider">{label}</p>
-              <p className={`text-3xl font-bold mt-1 ${color}`}>{value}</p>
+              <p className={`text-2xl md:text-3xl font-bold mt-1 ${color}`}>{value}</p>
             </div>
           ))}
         </div>
@@ -111,7 +112,7 @@ export default function TasksPage() {
         )}
 
         {showForm && (
-          <div className="bg-bg-surface border border-border rounded-xl p-5 mb-5 shadow-sm">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 mb-5 shadow-sm">
             <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Task" : "New Task"}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
@@ -126,7 +127,8 @@ export default function TasksPage() {
                   className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent resize-none placeholder:text-text-muted"
                   placeholder="Optional details…" />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              {/* Form grid: 1 col mobile → 3 col desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs text-text-secondary">Status</label>
                   <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -161,24 +163,27 @@ export default function TasksPage() {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-3 mb-4">
+        {/* Filter row: stacks on mobile, search full-width then segmented controls scroll horizontally. */}
+        <div className="flex flex-col md:flex-row md:flex-wrap gap-3 mb-4">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks…"
-            className="flex-1 min-w-48 bg-bg-surface border border-border rounded-lg px-3 py-2 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent" />
-          <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1">
-            {["all", "todo", "in-progress", "done"].map((s) => (
-              <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterStatus === s ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
-                {s === "all" ? "All" : STATUS_CONFIG[s].label}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1">
-            {["all", "high", "medium", "low"].map((p) => (
-              <button key={p} onClick={() => setFilterPriority(p)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${filterPriority === p ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
-                {p === "all" ? "All" : PRIORITY_CONFIG[p].label}
-              </button>
-            ))}
+            className="md:flex-1 md:min-w-48 bg-bg-surface border border-border rounded-lg px-3 py-2 text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent" />
+          <div className="flex gap-2 -mx-4 px-4 md:mx-0 md:px-0 overflow-x-auto md:overflow-visible">
+            <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1 flex-shrink-0">
+              {["all", "todo", "in-progress", "done"].map((s) => (
+                <button key={s} onClick={() => setFilterStatus(s)}
+                  className={`px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${filterStatus === s ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
+                  {s === "all" ? "All" : STATUS_CONFIG[s].label}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-1 bg-bg-surface border border-border rounded-lg p-1 flex-shrink-0">
+              {["all", "high", "medium", "low"].map((p) => (
+                <button key={p} onClick={() => setFilterPriority(p)}
+                  className={`px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${filterPriority === p ? "bg-accent text-white" : "text-text-secondary hover:text-text-primary"}`}>
+                  {p === "all" ? "All" : PRIORITY_CONFIG[p].label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -196,7 +201,7 @@ export default function TasksPage() {
               const pc = PRIORITY_CONFIG[task.priority];
               const overdue = isOverdue(task);
               return (
-                <div key={task.id} className={`bg-bg-surface border rounded-xl px-5 py-4 flex items-start gap-4 hover:border-border transition-colors shadow-sm ${overdue ? "border-red-500/40" : "border-border"} ${task.status === "done" ? "opacity-60" : ""}`}>
+                <div key={task.id} className={`bg-bg-surface border rounded-xl px-4 md:px-5 py-3.5 md:py-4 flex items-start gap-3 md:gap-4 hover:border-border transition-colors shadow-sm ${overdue ? "border-red-500/40" : "border-border"} ${task.status === "done" ? "opacity-60" : ""}`}>
                   <button onClick={() => cycleStatus(task)} title="Click to advance status"
                     className={`mt-0.5 w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
                       task.status === "done" ? "bg-green-500 border-green-500" : task.status === "in-progress" ? "border-yellow-400 bg-yellow-400/20" : "border-border hover:border-accent"
@@ -206,17 +211,17 @@ export default function TasksPage() {
                   <div className="flex-1 min-w-0">
                     <p className={`font-medium ${task.status === "done" ? "line-through text-text-muted" : "text-text-primary"}`}>{task.title}</p>
                     {task.description && <p className="text-xs text-text-muted mt-0.5 line-clamp-2">{task.description}</p>}
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${sc.color}`}>{sc.label}</span>
-                      <span className={`text-xs font-medium ${pc.color}`}>{pc.label} priority</span>
+                    <div className="flex flex-wrap gap-x-2 gap-y-1 mt-2 items-center">
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full ${sc.color}`}>{sc.label}</span>
+                      <span className={`text-[11px] font-medium ${pc.color}`}>{pc.label}</span>
                       {task.dueDate && (
-                        <span className={`text-xs ${overdue ? "text-red-600 dark:text-red-400 font-medium" : "text-text-muted"}`}>
+                        <span className={`text-[11px] ${overdue ? "text-red-600 dark:text-red-400 font-medium" : "text-text-muted"}`}>
                           {overdue ? "⚠ Overdue · " : "Due "}{new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                     <button onClick={() => openEdit(task)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                     <button onClick={() => handleDelete(task.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
                   </div>

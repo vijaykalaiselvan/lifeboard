@@ -79,22 +79,22 @@ export default function GoalsPage() {
 
   return (
     <ProtectedLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between gap-3 mb-5 md:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">Goals</h1>
-            <p className="text-sm text-text-muted mt-0.5">{goals.filter((g) => g.status === "active").length} active goals</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight">Goals</h1>
+            <p className="text-sm text-text-muted mt-1">{goals.filter((g) => g.status === "active").length} active goals</p>
           </div>
-          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
             + New Goal
           </button>
         </div>
 
         {showForm && (
-          <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm mb-6">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm mb-6">
             <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Goal" : "New Goal"}</h3>
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 space-y-1">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2 space-y-1">
                 <label className="text-xs text-text-secondary">Title</label>
                 <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                   className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
@@ -124,13 +124,13 @@ export default function GoalsPage() {
                 <input type="range" min="0" max="100" value={form.progress} onChange={(e) => setForm({ ...form, progress: e.target.value })}
                   className="w-full accent-accent mt-1" />
               </div>
-              <div className="col-span-2 space-y-1">
+              <div className="sm:col-span-2 space-y-1">
                 <label className="text-xs text-text-secondary">Description</label>
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
                   className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted resize-none"
                   placeholder="Optional description…" />
               </div>
-              <div className="col-span-2 flex gap-3 justify-end">
+              <div className="sm:col-span-2 flex gap-3 justify-end">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
                 <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                   {editing ? "Save changes" : "Create goal"}
@@ -159,8 +159,9 @@ export default function GoalsPage() {
 
               return (
                 <div key={goal.id} className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-                  <div className="px-5 py-4">
-                    <div className="flex items-start gap-4">
+                  <div className="px-4 md:px-5 py-3.5 md:py-4">
+                    {/* Stack header on mobile; row on desktop */}
+                    <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <p className="font-semibold text-text-primary">{goal.title}</p>
@@ -172,7 +173,7 @@ export default function GoalsPage() {
                           </span>
                         </div>
                         {goal.description && <p className="text-xs text-text-muted mb-2">{goal.description}</p>}
-                        <div className="flex items-center gap-4 text-xs text-text-muted mb-2">
+                        <div className="flex items-center gap-4 text-xs text-text-muted mb-2 flex-wrap">
                           {daysLeft !== null && (
                             <span className={daysLeft < 30 && goal.status === "active" ? "text-orange-500" : ""}>
                               {daysLeft > 0 ? `${daysLeft}d left` : daysLeft === 0 ? "Due today" : "Overdue"}
@@ -199,21 +200,23 @@ export default function GoalsPage() {
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-border bg-bg-elevated/50 px-5 py-4">
+                    <div className="border-t border-border bg-bg-elevated/50 px-4 md:px-5 py-3.5 md:py-4">
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Milestones</p>
                         <button onClick={() => setAddingMs(addingMs === goal.id ? null : goal.id)}
                           className="text-xs text-accent hover:text-accent/80">+ Add</button>
                       </div>
                       {addingMs === goal.id && (
-                        <form onSubmit={(e) => handleAddMilestone(goal.id, e)} className="flex gap-2 mb-3">
+                        <form onSubmit={(e) => handleAddMilestone(goal.id, e)} className="flex flex-col sm:flex-row gap-2 mb-3">
                           <input required value={msForm.title} onChange={(e) => setMsForm({ ...msForm, title: e.target.value })}
                             placeholder="Milestone title…"
                             className="flex-1 bg-bg-elevated border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent placeholder:text-text-muted" />
                           <input type="date" value={msForm.dueDate} onChange={(e) => setMsForm({ ...msForm, dueDate: e.target.value })}
                             className="bg-bg-elevated border border-border rounded-lg px-3 py-1.5 text-sm text-text-primary focus:outline-none focus:border-accent" />
-                          <button type="submit" className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90">Add</button>
-                          <button type="button" onClick={() => setAddingMs(null)} className="px-2 text-text-muted hover:text-text-primary">✕</button>
+                          <div className="flex gap-2">
+                            <button type="submit" className="flex-1 sm:flex-none px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:bg-accent/90">Add</button>
+                            <button type="button" onClick={() => setAddingMs(null)} className="px-2 text-text-muted hover:text-text-primary">✕</button>
+                          </div>
                         </form>
                       )}
                       {(!goal.milestones || goal.milestones.length === 0) ? (

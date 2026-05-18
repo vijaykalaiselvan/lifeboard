@@ -75,37 +75,37 @@ export default function IncomeTab() {
 
   return (
     <div className="space-y-5">
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Manual Sources</p>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(manualTotal)}</p>
+          <p className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(manualTotal)}</p>
           <p className="text-xs text-text-muted mt-0.5">{items.length} entries</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Bank Credits</p>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(bankTotal)}</p>
+          <p className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(bankTotal)}</p>
           <p className="text-xs text-text-muted mt-0.5">{bankTxns.length} transactions</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Combined</p>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(manualTotal + bankTotal)}</p>
+          <p className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(manualTotal + bankTotal)}</p>
         </div>
       </div>
 
       {/* Manual Income */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-text-primary">Manual Income Sources</h2>
-        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
           + Add Income
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Income" : "New Income"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-1">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-text-secondary">Source</label>
               <input required value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
@@ -136,7 +136,7 @@ export default function IncomeTab() {
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                 placeholder="Optional note" />
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                 {editing ? "Save changes" : "Add income"}
@@ -156,16 +156,16 @@ export default function IncomeTab() {
       ) : (
         <div className="space-y-2">
           {items.map((item) => (
-            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-4 shadow-sm">
+            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-4 md:px-5 py-3.5 md:py-4 flex items-center gap-3 md:gap-4 shadow-sm">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary">{item.source}</p>
                 {item.note && <p className="text-xs text-text-muted mt-0.5">{item.note}</p>}
               </div>
-              <span className="text-xs text-text-secondary bg-bg-elevated px-2 py-1 rounded-full border border-border">
+              <span className="text-xs text-text-secondary bg-bg-elevated px-2 py-1 rounded-full border border-border flex-shrink-0">
                 {FREQ_LABELS[item.frequency]}
               </span>
-              <span className="text-green-600 dark:text-green-400 font-semibold">{fmtINR(item.amount)}</span>
-              <div className="flex gap-2">
+              <span className="text-green-600 dark:text-green-400 font-semibold whitespace-nowrap">{fmtINR(item.amount)}</span>
+              <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                 <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                 <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
               </div>
@@ -175,7 +175,7 @@ export default function IncomeTab() {
       )}
 
       {/* Bank Credits */}
-      <div className="flex items-center justify-between mt-2">
+      <div className="flex items-center justify-between gap-3 mt-2">
         <h2 className="text-lg font-semibold text-text-primary">Bank Credits</h2>
         <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}
           className="bg-bg-elevated border border-border rounded-lg px-3 py-1.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
@@ -190,41 +190,69 @@ export default function IncomeTab() {
         </div>
       ) : (
         <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-bg-elevated">
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {bankTxns.map((txn) => (
-                <tr key={txn.id} className="hover:bg-bg-elevated/50 transition-colors">
-                  <td className="px-4 py-3 text-text-muted whitespace-nowrap">
-                    {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
-                  </td>
-                  <td className="px-4 py-3 text-text-primary max-w-xs truncate">{txn.description}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
-                      <span className="text-xs text-text-muted">{txn.account?.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
-                    +{fmtINR(txn.amount)}
-                  </td>
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-bg-elevated">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr className="border-t border-border bg-bg-elevated">
-                <td colSpan={3} className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Credits</td>
-                <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{fmtINR(bankTotal)}</td>
-              </tr>
-            </tfoot>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {bankTxns.map((txn) => (
+                  <tr key={txn.id} className="hover:bg-bg-elevated/50 transition-colors">
+                    <td className="px-4 py-3 text-text-muted whitespace-nowrap">
+                      {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                    </td>
+                    <td className="px-4 py-3 text-text-primary max-w-xs truncate">{txn.description}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                        <span className="text-xs text-text-muted">{txn.account?.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+                      +{fmtINR(txn.amount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border bg-bg-elevated">
+                  <td colSpan={3} className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Credits</td>
+                  <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">{fmtINR(bankTotal)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* Mobile: card list */}
+          <div className="md:hidden divide-y divide-border">
+            {bankTxns.map((txn) => (
+              <div key={txn.id} className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <p className="text-sm text-text-primary truncate">{txn.description}</p>
+                  <p className="text-sm font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
+                    +{fmtINR(txn.amount)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-text-muted">
+                  <span>{new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                    <span>{txn.account?.name}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-between px-4 py-3 bg-bg-elevated">
+              <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Credits</span>
+              <span className="text-sm font-bold text-green-600 dark:text-green-400">{fmtINR(bankTotal)}</span>
+            </div>
+          </div>
         </div>
       )}
     </div>

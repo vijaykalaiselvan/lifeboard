@@ -27,11 +27,9 @@ export default function LentTab() {
   const [editing, setEditing]       = useState(null);
   const [form, setForm]             = useState(EMPTY_LENT);
 
-  // Repayment form — separate "which row is open" from "form data"
   const [repayOpenId, setRepayOpenId] = useState(null);
   const [repayData, setRepayData]     = useState({ amount: "", repaidAt: todayISO(), note: "" });
 
-  // History expand
   const [expandedId, setExpandedId] = useState(null);
 
   const load = useCallback(async () => {
@@ -42,7 +40,6 @@ export default function LentTab() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── Group records by person name ──────────────────────────────────────────
   const grouped = records.reduce((acc, r) => {
     const key = r.personName.trim().toLowerCase();
     if (!acc[key]) acc[key] = { name: r.personName.trim(), records: [] };
@@ -58,7 +55,6 @@ export default function LentTab() {
     return { ...g, totalLent, totalRepaid, outstanding, allSettled };
   }).sort((a, b) => b.outstanding - a.outstanding);
 
-  // ── Summary stats ─────────────────────────────────────────────────────────
   const totalLent        = records.reduce((s, r) => s + r.amount, 0);
   const totalRepaid      = records.reduce((s, r) => s + r.repayments.reduce((rs, rp) => rs + rp.amount, 0), 0);
   const totalOutstanding = totalLent - totalRepaid;
@@ -70,12 +66,10 @@ export default function LentTab() {
     return true;
   });
 
-  // ── Record helpers ────────────────────────────────────────────────────────
   function recordOutstanding(r) {
     return r.amount - r.repayments.reduce((s, rp) => s + rp.amount, 0);
   }
 
-  // ── Form handlers ─────────────────────────────────────────────────────────
   function openAdd(prefillName = "") {
     setForm({ ...EMPTY_LENT, personName: prefillName, lentAt: todayISO() });
     setEditing(null);
@@ -122,27 +116,27 @@ export default function LentTab() {
 
   return (
     <div className="space-y-5">
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Outstanding</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(totalOutstanding)}</p>
+          <p className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(totalOutstanding)}</p>
           <p className="text-xs text-text-muted mt-0.5">{groups.filter((g) => !g.allSettled).length} people</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Lent</p>
-          <p className="text-2xl font-bold text-text-primary mt-1">{fmtINR(totalLent)}</p>
+          <p className="text-xl md:text-2xl font-bold text-text-primary mt-1">{fmtINR(totalLent)}</p>
           <p className="text-xs text-text-muted mt-0.5">{records.length} transactions</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Fully Recovered</p>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(totalRepaid)}</p>
+          <p className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(totalRepaid)}</p>
           <p className="text-xs text-text-muted mt-0.5">{settledCount} people settled</p>
         </div>
       </div>
 
       {/* Header + filter */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex gap-1 bg-bg-elevated rounded-lg p-1 border border-border">
           {[["outstanding","Outstanding"],["settled","Settled"],["all","All"]].map(([v, l]) => (
             <button key={v} onClick={() => setFilter(v)}
@@ -152,16 +146,16 @@ export default function LentTab() {
           ))}
         </div>
         <button onClick={() => openAdd()}
-          className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+          className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
           + Lend Money
         </button>
       </div>
 
       {/* Add / Edit form */}
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Record" : "New Lending"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-text-secondary">Person Name</label>
               <input required value={form.personName} onChange={(e) => setForm({ ...form, personName: e.target.value })}
@@ -182,7 +176,7 @@ export default function LentTab() {
               <input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })}
                 className={inputCls} placeholder="Purpose, occasion…" />
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => { setShowForm(false); setEditing(null); }}
                 className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit"
@@ -207,7 +201,7 @@ export default function LentTab() {
           {filteredGroups.map((g) => (
             <div key={g.name} className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
               {/* Person header */}
-              <div className="px-5 py-4 border-b border-border bg-bg-elevated/40 flex items-center justify-between">
+              <div className="px-4 md:px-5 py-3.5 md:py-4 border-b border-border bg-bg-elevated/40 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-accent font-bold text-sm flex-shrink-0">
                     {g.name.charAt(0).toUpperCase()}
@@ -217,15 +211,15 @@ export default function LentTab() {
                     <p className="text-xs text-text-muted">{g.records.length} transaction{g.records.length > 1 ? "s" : ""} · Total lent {fmtINR(g.totalLent)}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
                   <div className="text-right">
                     <p className="text-xs text-text-muted">Remaining</p>
-                    <p className={`text-lg font-bold ${g.allSettled ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    <p className={`text-base md:text-lg font-bold ${g.allSettled ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                       {g.allSettled ? "Settled ✓" : fmtINR(g.outstanding)}
                     </p>
                   </div>
                   <button onClick={() => openAdd(g.name)}
-                    className="text-xs bg-bg-elevated hover:bg-accent hover:text-white border border-border px-3 py-1.5 rounded-lg transition-colors">
+                    className="text-xs bg-bg-elevated hover:bg-accent hover:text-white border border-border px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
                     + Lend More
                   </button>
                 </div>
@@ -241,7 +235,7 @@ export default function LentTab() {
                   const isExpanded = expandedId === r.id;
 
                   return (
-                    <div key={r.id} className="px-5 py-4">
+                    <div key={r.id} className="px-4 md:px-5 py-3.5 md:py-4">
                       {/* Record row */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -278,10 +272,10 @@ export default function LentTab() {
                         </div>
                       </div>
 
-                      {/* Repayment form — separate state so typing doesn't close it */}
+                      {/* Repayment form */}
                       {repayOpenId === r.id && (
                         <form onSubmit={(e) => handleAddRepayment(e, r.id)}
-                          className="mt-3 grid grid-cols-3 gap-3 p-3 bg-bg-elevated rounded-lg border border-border">
+                          className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-bg-elevated rounded-lg border border-border">
                           <div className="space-y-1">
                             <label className="text-xs text-text-secondary">Amount (₹)</label>
                             <input
@@ -314,7 +308,7 @@ export default function LentTab() {
                               placeholder="Optional"
                             />
                           </div>
-                          <div className="col-span-3 flex gap-2 justify-end">
+                          <div className="sm:col-span-3 flex gap-2 justify-end">
                             <button type="button" onClick={() => setRepayOpenId(null)}
                               className="text-xs text-text-secondary hover:text-text-primary px-3 py-1.5">Cancel</button>
                             <button type="submit"

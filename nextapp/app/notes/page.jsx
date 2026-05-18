@@ -59,10 +59,10 @@ export default function NotesPage() {
 
   return (
     <ProtectedLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-text-primary">Notes</h1>
-          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <div className="flex items-center justify-between gap-3 mb-5 md:mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight">Notes</h1>
+          <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
             + New Note
           </button>
         </div>
@@ -71,14 +71,14 @@ export default function NotesPage() {
           className="w-full bg-bg-surface border border-border rounded-lg px-4 py-2 text-sm text-text-primary focus:outline-none focus:border-accent placeholder:text-text-muted mb-4" />
 
         {allTags.length > 0 && (
-          <div className="flex gap-2 flex-wrap mb-5">
+          <div className="flex gap-2 -mx-4 md:mx-0 px-4 md:px-0 mb-5 overflow-x-auto md:flex-wrap">
             <button onClick={() => setActiveTag(null)}
-              className={`text-xs px-3 py-1 rounded-full border transition-colors ${!activeTag ? "bg-accent text-white border-accent" : "border-border text-text-secondary hover:text-text-primary"}`}>
+              className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap transition-colors flex-shrink-0 ${!activeTag ? "bg-accent text-white border-accent" : "border-border text-text-secondary hover:text-text-primary"}`}>
               All
             </button>
             {allTags.map((tag) => (
               <button key={tag} onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                className={`text-xs px-3 py-1 rounded-full border transition-colors ${activeTag === tag ? "bg-accent text-white border-accent" : "border-border text-text-secondary hover:text-text-primary"}`}>
+                className={`text-xs px-3 py-1 rounded-full border whitespace-nowrap transition-colors flex-shrink-0 ${activeTag === tag ? "bg-accent text-white border-accent" : "border-border text-text-secondary hover:text-text-primary"}`}>
                 {tag}
               </button>
             ))}
@@ -86,7 +86,7 @@ export default function NotesPage() {
         )}
 
         {showForm && (
-          <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm mb-5">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm mb-5">
             <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Note" : "New Note"}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
@@ -101,14 +101,14 @@ export default function NotesPage() {
                   className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted resize-none"
                   placeholder="Write something…" />
               </div>
-              <div className="flex gap-4 items-end">
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-end">
                 <div className="flex-1 space-y-1">
                   <label className="text-xs text-text-secondary">Tags (comma-separated)</label>
                   <input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })}
                     className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                     placeholder="finance, goals, ideas…" />
                 </div>
-                <label className="flex items-center gap-2 pb-2 cursor-pointer">
+                <label className="flex items-center gap-2 sm:pb-2 cursor-pointer">
                   <input type="checkbox" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })}
                     className="w-4 h-4 accent-accent" />
                   <span className="text-sm text-text-secondary">Pinned</span>
@@ -132,9 +132,10 @@ export default function NotesPage() {
             <p>{notes.length === 0 ? "No notes yet. Create your first note." : "No notes match your search."}</p>
           </div>
         ) : (
+          // 1 col mobile → 2 col desktop masonry
           <div className="columns-1 md:columns-2 gap-4">
             {filtered.map((note) => (
-              <div key={note.id} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm break-inside-avoid mb-4">
+              <div key={note.id} className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm break-inside-avoid mb-4">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2 min-w-0">
                     {note.pinned && <span className="text-yellow-500 flex-shrink-0 text-sm">📌</span>}

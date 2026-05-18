@@ -17,18 +17,23 @@ export default function FinancePage() {
 
   return (
     <ProtectedLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold text-text-primary mb-6">Finance</h1>
-        <div className="flex gap-1 bg-bg-surface rounded-xl p-1 mb-6 w-fit border border-border">
-          {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
-                tab === t ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
-              }`}>
-              {t}
-            </button>
-          ))}
+      <div className="p-4 md:p-6 max-w-5xl mx-auto">
+        <h1 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight mb-5 md:mb-6">Finance</h1>
+
+        {/* Tab bar — horizontally scrollable on mobile so all 8 tabs are reachable. */}
+        <div className="-mx-4 md:mx-0 px-4 md:px-0 mb-5 md:mb-6 overflow-x-auto">
+          <div className="flex gap-1 bg-bg-surface rounded-xl p-1 w-fit border border-border">
+            {TABS.map((t) => (
+              <button key={t} onClick={() => setTab(t)}
+                className={`px-4 md:px-5 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                  tab === t ? "bg-accent text-white shadow" : "text-text-secondary hover:text-text-primary"
+                }`}>
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
+
         {tab === "Overview"      && <OverviewTab />}
         {tab === "Income"        && <IncomeTab />}
         {tab === "Expenses"      && <ExpensesTab />}

@@ -55,7 +55,6 @@ export default function ExpensesTab() {
   useEffect(() => {
     setBankLoading(true);
     const { from, to } = monthRange(selectedMonth);
-    // Fetch debits; exclude Income/Debt categories (those aren't spending)
     api.get(`/finance/transactions?type=debit&from=${from}&to=${to}&limit=500`)
       .then(({ data }) => setBankTxns(data.transactions ?? []))
       .catch(() => setBankTxns([]))
@@ -65,7 +64,6 @@ export default function ExpensesTab() {
   const manualTotal = items.reduce((s, i) => s + i.amount, 0);
   const bankTotal   = bankTxns.reduce((s, t) => s + t.amount, 0);
 
-  // Group bank debits by category
   const bankByCategory = bankTxns.reduce((acc, t) => {
     const cat = t.category || "Other";
     acc[cat] = (acc[cat] ?? 0) + t.amount;
@@ -99,19 +97,19 @@ export default function ExpensesTab() {
 
   return (
     <div className="space-y-5">
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Manual Expenses</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(manualTotal)}</p>
+          <p className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(manualTotal)}</p>
           <p className="text-xs text-text-muted mt-0.5">{items.length} entries</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Bank Debits</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(bankTotal)}</p>
+          <p className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(bankTotal)}</p>
           <p className="text-xs text-text-muted mt-0.5">{bankTxns.length} transactions</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Top Category</p>
           <p className="text-xl font-bold text-text-primary mt-1">
             {bankCatSorted[0]?.[0] ?? topManualCat?.[0] ?? "—"}
@@ -123,17 +121,17 @@ export default function ExpensesTab() {
       </div>
 
       {/* Manual Expenses */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-text-primary">Manual Expenses</h2>
-        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
           + Add Expense
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Expense" : "New Expense"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-text-secondary">Category</label>
               <select required value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -158,13 +156,13 @@ export default function ExpensesTab() {
               <input type="date" value={form.spentAt} onChange={(e) => setForm({ ...form, spentAt: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent" />
             </div>
-            <div className="col-span-2 space-y-1">
+            <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-text-secondary">Note</label>
               <input value={form.note ?? ""} onChange={(e) => setForm({ ...form, note: e.target.value })}
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent placeholder:text-text-muted"
                 placeholder="Optional note" />
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                 {editing ? "Save changes" : "Add expense"}
@@ -184,15 +182,15 @@ export default function ExpensesTab() {
       ) : (
         <div className="space-y-2">
           {items.map((item) => (
-            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-5 py-4 flex items-center gap-4 shadow-sm">
+            <div key={item.id} className="bg-bg-surface border border-border rounded-xl px-4 md:px-5 py-3.5 md:py-4 flex items-center gap-3 md:gap-4 shadow-sm">
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-text-primary">{item.description}</p>
                 {item.note && <p className="text-xs text-text-muted mt-0.5">{item.note}</p>}
                 {item.spentAt && <p className="text-xs text-text-muted mt-0.5">{new Date(item.spentAt).toLocaleDateString("en-IN")}</p>}
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full ${CAT_COLORS[item.category] ?? "bg-bg-elevated text-text-secondary"}`}>{item.category}</span>
-              <span className="text-red-600 dark:text-red-400 font-semibold">{fmtINR(item.amount)}</span>
-              <div className="flex gap-2">
+              <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${CAT_COLORS[item.category] ?? "bg-bg-elevated text-text-secondary"}`}>{item.category}</span>
+              <span className="text-red-600 dark:text-red-400 font-semibold whitespace-nowrap">{fmtINR(item.amount)}</span>
+              <div className="flex flex-col md:flex-row gap-1 md:gap-2 flex-shrink-0 items-end">
                 <button onClick={() => openEdit(item)} className="text-text-muted hover:text-accent text-sm transition-colors">Edit</button>
                 <button onClick={() => handleDelete(item.id)} className="text-text-muted hover:text-red-500 text-sm transition-colors">Delete</button>
               </div>
@@ -202,7 +200,7 @@ export default function ExpensesTab() {
       )}
 
       {/* Bank Debits */}
-      <div className="flex items-center justify-between mt-2">
+      <div className="flex items-center justify-between gap-3 mt-2">
         <h2 className="text-lg font-semibold text-text-primary">Bank Debits</h2>
         <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}
           className="bg-bg-elevated border border-border rounded-lg px-3 py-1.5 text-text-primary text-sm focus:outline-none focus:border-accent" />
@@ -218,7 +216,7 @@ export default function ExpensesTab() {
       ) : (
         <div className="space-y-4">
           {/* Category breakdown */}
-          <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+          <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
             <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">By Category</p>
             <div className="space-y-2">
               {bankCatSorted.map(([cat, amt]) => (
@@ -236,47 +234,78 @@ export default function ExpensesTab() {
 
           {/* Transaction list */}
           <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-bg-elevated">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {bankTxns.map((txn) => (
-                  <tr key={txn.id} className="hover:bg-bg-elevated/50 transition-colors">
-                    <td className="px-4 py-3 text-text-muted whitespace-nowrap">
-                      {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
-                    </td>
-                    <td className="px-4 py-3 text-text-primary max-w-xs truncate">{txn.description}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${CAT_COLORS[txn.category] ?? "bg-bg-elevated text-text-secondary"}`}>
-                        {txn.category || "Other"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
-                        <span className="text-xs text-text-muted">{txn.account?.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
-                      −{fmtINR(txn.amount)}
-                    </td>
+            {/* Desktop: table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-bg-elevated">
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
+                    <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
+                    <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr className="border-t border-border bg-bg-elevated">
-                  <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Debits</td>
-                  <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{fmtINR(bankTotal)}</td>
-                </tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {bankTxns.map((txn) => (
+                    <tr key={txn.id} className="hover:bg-bg-elevated/50 transition-colors">
+                      <td className="px-4 py-3 text-text-muted whitespace-nowrap">
+                        {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                      </td>
+                      <td className="px-4 py-3 text-text-primary max-w-xs truncate">{txn.description}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${CAT_COLORS[txn.category] ?? "bg-bg-elevated text-text-secondary"}`}>
+                          {txn.category || "Other"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                          <span className="text-xs text-text-muted">{txn.account?.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
+                        −{fmtINR(txn.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t border-border bg-bg-elevated">
+                    <td colSpan={4} className="px-4 py-3 text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Debits</td>
+                    <td className="px-4 py-3 text-right font-bold text-red-600 dark:text-red-400">{fmtINR(bankTotal)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            {/* Mobile: card list */}
+            <div className="md:hidden divide-y divide-border">
+              {bankTxns.map((txn) => (
+                <div key={txn.id} className="px-4 py-3">
+                  <div className="flex items-start justify-between gap-3 mb-1.5">
+                    <p className="text-sm text-text-primary truncate">{txn.description}</p>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
+                      −{fmtINR(txn.amount)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap text-xs text-text-muted">
+                    <span>{new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</span>
+                    <span className={`px-2 py-0.5 rounded-full ${CAT_COLORS[txn.category] ?? "bg-bg-elevated text-text-secondary"}`}>
+                      {txn.category || "Other"}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                      <span>{txn.account?.name}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div className="flex justify-between px-4 py-3 bg-bg-elevated">
+                <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Total Debits</span>
+                <span className="text-sm font-bold text-red-600 dark:text-red-400">{fmtINR(bankTotal)}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

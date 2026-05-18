@@ -27,10 +27,9 @@ export default function TransactionsTab() {
   const [transactions, setTransactions] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [editingCat, setEditingCat] = useState(null); // txn id
+  const [editingCat, setEditingCat] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
 
-  // Filters
   const [accountId, setAccountId] = useState("");
   const [category, setCategory] = useState("");
   const [type, setType] = useState("");
@@ -79,34 +78,33 @@ export default function TransactionsTab() {
     load();
   }
 
-  // Summary for current filter (debit/credit totals across displayed transactions)
   const totalDebits  = transactions.filter((t) => t.type === "debit").reduce((s, t) => s + t.amount, 0);
   const totalCredits = transactions.filter((t) => t.type === "credit").reduce((s, t) => s + t.amount, 0);
 
   return (
     <div className="space-y-5">
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+      {/* Summary — 1 col mobile → 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Debits</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(totalDebits)}</p>
+          <p className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{fmtINR(totalDebits)}</p>
           <p className="text-xs text-text-muted mt-0.5">{transactions.filter((t) => t.type === "debit").length} transactions</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Total Credits</p>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(totalCredits)}</p>
+          <p className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{fmtINR(totalCredits)}</p>
           <p className="text-xs text-text-muted mt-0.5">{transactions.filter((t) => t.type === "credit").length} transactions</p>
         </div>
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <p className="text-xs text-text-muted uppercase tracking-wider">Net</p>
-          <p className={`text-2xl font-bold mt-1 ${totalCredits - totalDebits >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+          <p className={`text-xl md:text-2xl font-bold mt-1 ${totalCredits - totalDebits >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
             {totalCredits - totalDebits >= 0 ? "+" : ""}{fmtINR(totalCredits - totalDebits)}
           </p>
           <p className="text-xs text-text-muted mt-0.5">{transactions.length} of {total} shown</p>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters — 2 col mobile → 3 col desktop (already correct) */}
       <div className="bg-bg-surface border border-border rounded-xl p-4 shadow-sm">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <select value={accountId} onChange={(e) => setAccountId(e.target.value)}
@@ -153,78 +151,134 @@ export default function TransactionsTab() {
         </div>
       ) : (
         <div className="bg-bg-surface border border-border rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-bg-elevated">
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 w-12" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {transactions.map((txn) => {
-                const isExpanded = expandedRow === txn.id;
-                return (
-                  <>
-                    <tr key={txn.id}
-                      className="hover:bg-bg-elevated/50 transition-colors cursor-pointer"
-                      onClick={() => setExpandedRow(isExpanded ? null : txn.id)}>
-                      <td className="px-4 py-3 text-text-muted whitespace-nowrap">
-                        {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
-                      </td>
-                      <td className="px-4 py-3 text-text-primary max-w-xs">
-                        <p className="truncate">{txn.description}</p>
-                        {txn.reference && <p className="text-xs text-text-muted truncate">{txn.reference}</p>}
-                      </td>
-                      <td className="px-4 py-3">
-                        {editingCat === txn.id ? (
-                          <select autoFocus defaultValue={txn.category || "Other"}
-                            onBlur={(e) => updateCategory(txn.id, e.target.value)}
-                            onChange={(e) => updateCategory(txn.id, e.target.value)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-xs bg-bg-elevated border border-accent rounded px-2 py-1 text-text-primary focus:outline-none">
-                            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                          </select>
-                        ) : (
-                          <button onClick={(e) => { e.stopPropagation(); setEditingCat(txn.id); }}
-                            className={`text-xs px-2 py-0.5 rounded-full cursor-pointer hover:opacity-80 transition-opacity ${CAT_COLORS[txn.category] ?? CAT_COLORS["Other"]}`}>
-                            {txn.category || "Other"}
-                          </button>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
-                          <span className="text-xs text-text-muted truncate max-w-24">{txn.account?.name}</span>
-                        </div>
-                      </td>
-                      <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${txn.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
-                        {txn.type === "debit" ? "−" : "+"}{fmtINR(txn.amount)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete(txn.id); }}
-                          className="text-text-muted hover:text-red-500 text-xs transition-colors">✕</button>
-                      </td>
-                    </tr>
-                    {isExpanded && (
-                      <tr key={`${txn.id}-expanded`} className="bg-bg-elevated/30">
-                        <td colSpan={6} className="px-4 py-3">
-                          <div className="flex gap-6 text-xs text-text-secondary">
-                            <div><span className="text-text-muted">Full description:</span> {txn.description}</div>
-                            {txn.balance != null && <div><span className="text-text-muted">Balance after:</span> ₹{txn.balance.toLocaleString("en-IN")}</div>}
-                            {txn.reference && <div><span className="text-text-muted">Reference:</span> {txn.reference}</div>}
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-bg-elevated">
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Category</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Account</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Amount</th>
+                  <th className="px-4 py-3 w-12" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {transactions.map((txn) => {
+                  const isExpanded = expandedRow === txn.id;
+                  return (
+                    <>
+                      <tr key={txn.id}
+                        className="hover:bg-bg-elevated/50 transition-colors cursor-pointer"
+                        onClick={() => setExpandedRow(isExpanded ? null : txn.id)}>
+                        <td className="px-4 py-3 text-text-muted whitespace-nowrap">
+                          {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                        </td>
+                        <td className="px-4 py-3 text-text-primary max-w-xs">
+                          <p className="truncate">{txn.description}</p>
+                          {txn.reference && <p className="text-xs text-text-muted truncate">{txn.reference}</p>}
+                        </td>
+                        <td className="px-4 py-3">
+                          {editingCat === txn.id ? (
+                            <select autoFocus defaultValue={txn.category || "Other"}
+                              onBlur={(e) => updateCategory(txn.id, e.target.value)}
+                              onChange={(e) => updateCategory(txn.id, e.target.value)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-xs bg-bg-elevated border border-accent rounded px-2 py-1 text-text-primary focus:outline-none">
+                              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          ) : (
+                            <button onClick={(e) => { e.stopPropagation(); setEditingCat(txn.id); }}
+                              className={`text-xs px-2 py-0.5 rounded-full cursor-pointer hover:opacity-80 transition-opacity ${CAT_COLORS[txn.category] ?? CAT_COLORS["Other"]}`}>
+                              {txn.category || "Other"}
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                            <span className="text-xs text-text-muted truncate max-w-24">{txn.account?.name}</span>
                           </div>
                         </td>
+                        <td className={`px-4 py-3 text-right font-medium whitespace-nowrap ${txn.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                          {txn.type === "debit" ? "−" : "+"}{fmtINR(txn.amount)}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(txn.id); }}
+                            className="text-text-muted hover:text-red-500 text-xs transition-colors">✕</button>
+                        </td>
                       </tr>
+                      {isExpanded && (
+                        <tr key={`${txn.id}-expanded`} className="bg-bg-elevated/30">
+                          <td colSpan={6} className="px-4 py-3">
+                            <div className="flex gap-6 text-xs text-text-secondary">
+                              <div><span className="text-text-muted">Full description:</span> {txn.description}</div>
+                              {txn.balance != null && <div><span className="text-text-muted">Balance after:</span> ₹{txn.balance.toLocaleString("en-IN")}</div>}
+                              {txn.reference && <div><span className="text-text-muted">Reference:</span> {txn.reference}</div>}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: card list — date + description + amount; category as chip */}
+          <div className="md:hidden divide-y divide-border">
+            {transactions.map((txn) => {
+              const isExpanded = expandedRow === txn.id;
+              return (
+                <div key={txn.id} className="px-4 py-3 cursor-pointer"
+                  onClick={() => setExpandedRow(isExpanded ? null : txn.id)}>
+                  <div className="flex items-start justify-between gap-3 mb-1.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-text-primary truncate">{txn.description}</p>
+                      {txn.reference && <p className="text-xs text-text-muted truncate">{txn.reference}</p>}
+                    </div>
+                    <p className={`text-sm font-medium whitespace-nowrap ${txn.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                      {txn.type === "debit" ? "−" : "+"}{fmtINR(txn.amount)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-text-muted">
+                      {new Date(txn.date).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}
+                    </span>
+                    {editingCat === txn.id ? (
+                      <select autoFocus defaultValue={txn.category || "Other"}
+                        onBlur={(e) => updateCategory(txn.id, e.target.value)}
+                        onChange={(e) => updateCategory(txn.id, e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs bg-bg-elevated border border-accent rounded px-2 py-0.5 text-text-primary focus:outline-none">
+                        {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    ) : (
+                      <button onClick={(e) => { e.stopPropagation(); setEditingCat(txn.id); }}
+                        className={`text-xs px-2 py-0.5 rounded-full cursor-pointer hover:opacity-80 transition-opacity ${CAT_COLORS[txn.category] ?? CAT_COLORS["Other"]}`}>
+                        {txn.category || "Other"}
+                      </button>
                     )}
-                  </>
-                );
-              })}
-            </tbody>
-          </table>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: txn.account?.color || "#7c3aed" }} />
+                      <span className="text-xs text-text-muted truncate">{txn.account?.name}</span>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(txn.id); }}
+                      className="text-text-muted hover:text-red-500 text-xs transition-colors ml-auto">✕</button>
+                  </div>
+                  {isExpanded && (
+                    <div className="mt-2 pt-2 border-t border-border flex flex-wrap gap-4 text-xs text-text-secondary">
+                      <div><span className="text-text-muted">Full description:</span> {txn.description}</div>
+                      {txn.balance != null && <div><span className="text-text-muted">Balance after:</span> ₹{txn.balance.toLocaleString("en-IN")}</div>}
+                      {txn.reference && <div><span className="text-text-muted">Reference:</span> {txn.reference}</div>}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

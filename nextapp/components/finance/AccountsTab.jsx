@@ -26,10 +26,9 @@ export default function AccountsTab() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
 
-  // Import state
   const [importingId, setImportingId] = useState(null);
-  const [importPreview, setImportPreview] = useState(null); // { format, transactions, accountId }
-  const [importStatus, setImportStatus] = useState(null);  // { inserted, skipped } or { error }
+  const [importPreview, setImportPreview] = useState(null);
+  const [importStatus, setImportStatus] = useState(null);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -116,21 +115,21 @@ export default function AccountsTab() {
       {/* Hidden file input */}
       <input ref={fileInputRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFileChange} />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-text-primary">Bank Accounts & Cards</h2>
           <p className="text-xs text-text-muted mt-0.5">Add your accounts once, then import CSV statements anytime.</p>
         </div>
-        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+        <button onClick={openAdd} className="bg-accent hover:bg-accent/90 text-white text-sm px-4 py-2 rounded-lg transition-colors whitespace-nowrap">
           + Add Account
         </button>
       </div>
 
       {/* Add / Edit form */}
       {showForm && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
           <h3 className="text-sm font-medium text-text-primary mb-4">{editing ? "Edit Account" : "New Account"}</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-text-secondary">Account Name</label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -158,9 +157,9 @@ export default function AccountsTab() {
                 className="w-full bg-bg-elevated border border-border rounded-lg px-3 py-2 text-text-primary text-sm focus:outline-none focus:border-accent"
                 placeholder="1234 (optional)" />
             </div>
-            <div className="col-span-2 space-y-1">
+            <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-text-secondary">Color</label>
-              <div className="flex gap-2 mt-1">
+              <div className="flex gap-2 mt-1 flex-wrap">
                 {COLORS.map((c) => (
                   <button key={c} type="button" onClick={() => setForm({ ...form, color: c })}
                     className={`w-7 h-7 rounded-full border-2 transition-all ${form.color === c ? "border-text-primary scale-110" : "border-transparent"}`}
@@ -168,7 +167,7 @@ export default function AccountsTab() {
                 ))}
               </div>
             </div>
-            <div className="col-span-2 flex gap-3 justify-end">
+            <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary">Cancel</button>
               <button type="submit" className="px-4 py-2 text-sm bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors">
                 {editing ? "Save changes" : "Add account"}
@@ -180,8 +179,8 @@ export default function AccountsTab() {
 
       {/* Import preview */}
       {importPreview && (
-        <div className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <div>
               <p className="text-sm font-medium text-text-primary">Import Preview — {importPreview.accountName}</p>
               <p className="text-xs text-text-muted mt-0.5">
@@ -195,33 +194,57 @@ export default function AccountsTab() {
             <p className="text-sm text-red-500">No transactions parsed. The CSV format may not be supported — try saving as CSV from Excel first.</p>
           ) : (
             <>
-              <div className="border border-border rounded-lg overflow-x-auto mb-4">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-bg-elevated border-b border-border">
-                      {["Date", "Description", "Type", "Amount", "Category"].map((h) => (
-                        <th key={h} className="px-3 py-2 text-left text-text-muted font-medium">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {importPreview.transactions.slice(0, 10).map((t, i) => (
-                      <tr key={i} className="hover:bg-bg-elevated/50">
-                        <td className="px-3 py-2 text-text-muted">{t.date?.slice(0, 10)}</td>
-                        <td className="px-3 py-2 text-text-primary max-w-xs truncate">{t.description}</td>
-                        <td className="px-3 py-2">
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${t.type === "debit" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300"}`}>
-                            {t.type}
-                          </span>
-                        </td>
-                        <td className={`px-3 py-2 font-medium ${t.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
-                          ₹{t.amount.toLocaleString("en-IN")}
-                        </td>
-                        <td className="px-3 py-2 text-text-muted">{t.category}</td>
+              <div className="border border-border rounded-lg overflow-hidden mb-4">
+                {/* Desktop: table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-bg-elevated border-b border-border">
+                        {["Date", "Description", "Type", "Amount", "Category"].map((h) => (
+                          <th key={h} className="px-3 py-2 text-left text-text-muted font-medium">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {importPreview.transactions.slice(0, 10).map((t, i) => (
+                        <tr key={i} className="hover:bg-bg-elevated/50">
+                          <td className="px-3 py-2 text-text-muted">{t.date?.slice(0, 10)}</td>
+                          <td className="px-3 py-2 text-text-primary max-w-xs truncate">{t.description}</td>
+                          <td className="px-3 py-2">
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${t.type === "debit" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300"}`}>
+                              {t.type}
+                            </span>
+                          </td>
+                          <td className={`px-3 py-2 font-medium ${t.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                            ₹{t.amount.toLocaleString("en-IN")}
+                          </td>
+                          <td className="px-3 py-2 text-text-muted">{t.category}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile: card list */}
+                <div className="md:hidden divide-y divide-border">
+                  {importPreview.transactions.slice(0, 10).map((t, i) => (
+                    <div key={i} className="px-4 py-3">
+                      <div className="flex items-start justify-between gap-3 mb-1">
+                        <p className="text-xs text-text-primary truncate">{t.description}</p>
+                        <p className={`text-xs font-medium whitespace-nowrap ${t.type === "debit" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"}`}>
+                          ₹{t.amount.toLocaleString("en-IN")}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                        <span>{t.date?.slice(0, 10)}</span>
+                        <span className={`px-1.5 py-0.5 rounded font-medium ${t.type === "debit" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300"}`}>
+                          {t.type}
+                        </span>
+                        <span>{t.category}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
               {importPreview.transactions.length > 10 && (
                 <p className="text-xs text-text-muted mb-4">… and {importPreview.transactions.length - 10} more rows</p>
@@ -240,7 +263,7 @@ export default function AccountsTab() {
 
       {/* Import success/error */}
       {importStatus && (
-        <div className={`rounded-xl px-5 py-4 text-sm border ${importStatus.error ? "bg-red-50 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300" : "bg-green-50 border-green-200 text-green-700 dark:bg-green-500/10 dark:border-green-500/30 dark:text-green-300"}`}>
+        <div className={`rounded-xl px-4 md:px-5 py-4 text-sm border ${importStatus.error ? "bg-red-50 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300" : "bg-green-50 border-green-200 text-green-700 dark:bg-green-500/10 dark:border-green-500/30 dark:text-green-300"}`}>
           {importStatus.error
             ? importStatus.error
             : `✓ ${importStatus.inserted} transactions imported · ${importStatus.skipped} duplicates skipped`}
@@ -257,9 +280,9 @@ export default function AccountsTab() {
           <p>No accounts yet. Add your first bank account or credit card.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
           {accounts.map((acc) => (
-            <div key={acc.id} className="bg-bg-surface border border-border rounded-xl p-5 shadow-sm">
+            <div key={acc.id} className="bg-bg-surface border border-border rounded-xl p-4 md:p-5 shadow-sm">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
@@ -289,7 +312,7 @@ export default function AccountsTab() {
                   last import <span className="font-medium text-text-secondary">{fmtDate(acc.lastImportedAt)}</span>
                 </div>
                 <button onClick={() => startImport(acc)}
-                  className="text-xs bg-bg-elevated hover:bg-accent hover:text-white border border-border px-3 py-1.5 rounded-lg transition-colors">
+                  className="text-xs bg-bg-elevated hover:bg-accent hover:text-white border border-border px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
                   Import CSV
                 </button>
               </div>
@@ -298,7 +321,7 @@ export default function AccountsTab() {
         </div>
       )}
 
-      <div className="rounded-xl bg-bg-elevated border border-border px-5 py-4 text-xs text-text-muted space-y-1">
+      <div className="rounded-xl bg-bg-elevated border border-border px-4 md:px-5 py-4 text-xs text-text-muted space-y-1">
         <p className="font-medium text-text-secondary">How to import</p>
         <p>1. Log in to your bank's net banking portal and download a statement as CSV.</p>
         <p>2. Click <strong>Import CSV</strong> on the matching account above.</p>
