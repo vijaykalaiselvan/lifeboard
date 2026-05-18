@@ -1,21 +1,10 @@
 {
   "name": "lifeboard",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Personal life management dashboard",
   "scripts": {
-    "dev": "concurrently -n server,client -c cyan,magenta \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "dev:server": "npm run dev --prefix server",
-    "dev:client": "npm run dev --prefix client"
-  },
-  "repository": {
-    "type": "git",
-    "url": "http://local_proxy@127.0.0.1:35655/git/vijaykalaiselvan/lifeboard"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "concurrently": "^9.2.1"
+    "dev":   "npm run dev   --prefix nextapp",
+    "build": "npm run build --prefix nextapp",
+    "start": "npm run start --prefix nextapp"
   }
 }
